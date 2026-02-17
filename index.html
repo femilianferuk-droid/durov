@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Durov Clicker 4.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            margin: 0;
+        }
+
+        .game-container {
+            background: rgba(18, 25, 45, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 20px 16px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.8), inset 0 1px 3px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(66, 135, 245, 0.4);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px #2563eb;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .subtitle {
+            color: #7890b0;
+            font-size: 0.85rem;
+        }
+
+        .mode-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: #16233f;
+            border: 2px solid #3d5c96;
+            border-radius: 30px;
+            padding: 12px;
+            text-align: center;
+            color: #9bb9ff;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 4px 0 #0d172a;
+        }
+
+        .mode-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0d172a;
+        }
+
+        .mode-btn.active {
+            background: #4c7bcb;
+            color: white;
+            border-color: #9bb9ff;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .score-panel {
+            background: #0b1425;
+            border-radius: 30px;
+            padding: 10px 15px;
+            flex: 2;
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #2d4379;
+            box-shadow: inset 0 3px 0 #040814, 0 6px 0 #040a18;
+        }
+
+        .score-label {
+            color: #9bb9ff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            background: #1e2b48;
+            padding: 5px 10px;
+            border-radius: 25px;
+            white-space: nowrap;
+        }
+
+        .score-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fed7aa;
+            text-shadow: 0 0 15px #f59e0b;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+            max-width: 140px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0 3px;
+            scrollbar-width: none;
+        }
+        
+        .score-value::-webkit-scrollbar {
+            display: none;
+        }
+
+        .click-power-panel {
+            background: #0b1425;
+            border-radius: 30px;
+            padding: 10px 12px;
+            flex: 1;
+            min-width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            border: 2px solid #2d4379;
+            box-shadow: inset 0 3px 0 #040814, 0 6px 0 #040a18;
+        }
+
+        .power-value {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #6ee7b7;
+            text-shadow: 0 0 15px #059669;
+        }
+
+        .power-label {
+            font-size: 0.9rem;
+            color: #9bb9ff;
+        }
+
+        .durov-card {
+            background: #111c34;
+            border-radius: 40px;
+            padding: 12px 12px 18px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 3px solid #3a5a9a;
+            box-shadow: 0 10px 0 #0a1222, 0 15px 25px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .durov-card:active {
+            transform: translateY(7px);
+            box-shadow: 0 3px 0 #0a1222, 0 10px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .durov-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 30px;
+            overflow: hidden;
+            background: #1f2b44;
+            padding: 8px;
+        }
+
+        .durov-photo {
+            width: 100%;
+            max-width: 240px;
+            height: auto;
+            border-radius: 30px;
+            border: 4px solid #4c7bcb;
+            object-fit: cover;
+            transition: transform 0.2s;
+            display: block;
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd966;
+            text-shadow: 0 0 15px #f59e0b;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5);
+            }
+        }
+
+        /* Block Blast режим */
+        .block-blast-mode {
+            background: #16233f;
+            border-radius: 30px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 2px solid #4c7bcb;
+        }
+
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .block-cell {
+            aspect-ratio: 1;
+            background: #1a2742;
+            border-radius: 12px;
+            border: 2px solid #3d5c96;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 3px 0 #0d172a;
+        }
+
+        .block-cell:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0d172a;
+        }
+
+        .block-cell.filled {
+            background: #4c7bcb;
+            border-color: #9bb9ff;
+            box-shadow: 0 3px 0 #2d4379;
+        }
+
+        .next-blocks {
+            background: #1a2742;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .next-blocks-title {
+            color: #9bb9ff;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .next-blocks-grid {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .next-block-item {
+            background: #0b1425;
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            border: 2px solid #3d5c96;
+            min-width: 80px;
+        }
+
+        .next-block-preview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3px;
+        }
+
+        .preview-cell {
+            width: 20px;
+            height: 20px;
+            background: #1a2742;
+            border-radius: 5px;
+            border: 1px solid #3d5c96;
+        }
+
+        .preview-cell.active {
+            background: #4c7bcb;
+            border-color: #9bb9ff;
+        }
+
+        .block-score {
+            color: #ffbe76;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Прогресс-бар */
+        .progress-section {
+            background: #16233f;
+            border-radius: 30px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #3d5c96;
+        }
+
+        .progress-bar {
+            background: #1a2742;
+            height: 24px;
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid #3a5a9a;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4c7bcb, #9bb9ff);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 15px #4c7bcb;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px black;
+            z-index: 2;
+        }
+
+        .progress-reward {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #9bb9ff;
+            font-size: 0.85rem;
+        }
+
+        .claim-reward-btn {
+            background: #4c7bcb;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 0 #2d4379;
+            cursor: pointer;
+            transition: 0.08s linear;
+        }
+
+        .claim-reward-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #2d4379;
+        }
+
+        .claim-reward-btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            background: #16233f;
+            border: 2px solid #3d5c96;
+            border-radius: 30px;
+            padding: 10px;
+            text-align: center;
+            color: #9bb9ff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 4px 0 #0d172a;
+        }
+
+        .tab:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0d172a;
+        }
+
+        .tab.active {
+            background: #4c7bcb;
+            color: white;
+            border-color: #9bb9ff;
+        }
+
+        .boosts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #4f6eae #1a2742;
+        }
+
+        .boosts-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-track {
+            background: #1a2742;
+            border-radius: 10px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-thumb {
+            background: #4f6eae;
+            border-radius: 10px;
+        }
+
+        .boost-item {
+            background: #16233f;
+            border-radius: 24px;
+            padding: 12px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #3d5c96;
+            box-shadow: 0 6px 0 #0d172a;
+            transition: 0.08s linear;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .boost-item:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0d172a;
+        }
+
+        .boost-emoji {
+            font-size: 1.8rem;
+            filter: drop-shadow(2px 4px 3px black);
+            margin-bottom: 4px;
+        }
+
+        .boost-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .boost-name {
+            font-weight: 700;
+            color: white;
+            font-size: 0.8rem;
+            text-align: center;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            word-break: break-word;
+        }
+
+        .boost-price {
+            color: #ffbe76;
+            font-weight: 800;
+            font-size: 0.95rem;
+            background: #00000040;
+            padding: 4px 10px;
+            border-radius: 30px;
+            margin-top: 5px;
+            border: 1px solid #f39c12;
+            width: fit-content;
+        }
+
+        .boost-price::before {
+            content: "💰 ";
+            font-size: 0.7rem;
+        }
+
+        .boost-owned {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #4c7bcb;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        .disabled-boost {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.7);
+            border-color: #555;
+        }
+
+        .daily-bonus {
+            background: #1e2b48;
+            border-radius: 25px;
+            padding: 10px 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #4c7bcb;
+        }
+
+        .bonus-text {
+            color: #9bb9ff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .bonus-button {
+            background: #4c7bcb;
+            border: none;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 0 #2d4379;
+            cursor: pointer;
+            transition: 0.08s linear;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        .bonus-button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2d4379;
+        }
+
+        .bonus-button.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .achievements-section {
+            background: #16233f;
+            border-radius: 30px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #3d5c96;
+        }
+
+        .achievements-title {
+            color: #9bb9ff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .achievement-item {
+            background: #1a2742;
+            border-radius: 20px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #3d5c96;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        .achievement-item.unlocked {
+            opacity: 1;
+            border-color: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        .achievement-emoji {
+            font-size: 1.5rem;
+        }
+
+        .achievement-name {
+            color: white;
+            font-size: 0.65rem;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            color: #50648b;
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #1e3a5f;
+            color: #9bb9ff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            border: 1px solid #4c7bcb;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+
+        .auto-save-indicator.show {
+            opacity: 1;
+        }
+
+        .floating-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a5f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid #4c7bcb;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            0% {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title" id="gameTitle">DUROV CLICKER 4.0</h1>
+            <div class="subtitle">два режима - двойной профит</div>
+        </div>
+
+        <!-- Переключатель режимов -->
+        <div class="mode-switch">
+            <div class="mode-btn active" id="modeClicker">👆 КЛИКЕР</div>
+            <div class="mode-btn" id="modeBlast">🧩 BLOCK BLAST</div>
+        </div>
+
+        <!-- Режим кликера (виден по умолчанию) -->
+        <div id="clickerMode">
+            <div class="stats-row">
+                <div class="score-panel">
+                    <span class="score-label">🪙 TON</span>
+                    <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="click-power-panel">
+                    <span class="power-value" id="powerDisplay">1</span>
+                    <span class="power-label">⚡</span>
+                </div>
+            </div>
+
+            <!-- Кликабельный Дуров -->
+            <div class="durov-card" id="clickableDurov">
+                <div class="durov-image">
+                    <img class="durov-photo" 
+                         src="https://nmosknews.ru/img/20260216/aa1a30195815eee59c8dfc1932eb0159_o.jpg"
+                         alt="Павел Дуров"
+                         id="durovImage"
+                         onerror="this.src='https://i.imgur.com/3XJq7oU.jpg'">
+                </div>
+                <div class="click-hint" style="text-align: center; color: #d4e2ff; font-weight: 600; margin-top: 10px; background: #1e3260; padding: 6px 16px; border-radius: 30px; width: fit-content; margin-left: auto; margin-right: auto; font-size: 0.9rem;">
+                    👆 ТАПАЙ ПО ДУРОВУ 👆
+                </div>
+            </div>
+
+            <!-- Прогресс-бар с наградой -->
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    <span class="progress-text" id="progressText">0 / 10000</span>
+                </div>
+                <div class="progress-reward">
+                    <span>🎁 Награда за цикл: <span id="cycleReward">1000</span> TON</span>
+                    <button class="claim-reward-btn" id="claimCycleReward">ЗАБРАТЬ</button>
+                </div>
+            </div>
+
+            <!-- Вкладки -->
+            <div class="tabs">
+                <div class="tab active" id="tabBoosts">🚀 УЛУЧШЕНИЯ</div>
+                <div class="tab" id="tabAchievements">🏆 ДОСТИЖЕНИЯ</div>
+            </div>
+
+            <!-- Улучшения -->
+            <div class="boosts-grid" id="boostsGrid">
+                <div class="boost-item" id="boostBrother">
+                    <span class="boost-emoji">👥</span>
+                    <div class="boost-info">
+                        <span class="boost-name">Брат Дурова</span>
+                        <span class="boost-price" id="brotherPrice">100</span>
+                    </div>
+                    <span class="boost-owned" id="brotherOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostVk">
+                    <span class="boost-emoji">📘</span>
+                    <div class="boost-info">
+                        <span class="boost-name">ВК</span>
+                        <span class="boost-price" id="vkPrice">250</span>
+                    </div>
+                    <span class="boost-owned" id="vkOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostTg">
+                    <span class="boost-emoji">✈️</span>
+                    <div class="boost-info">
+                        <span class="boost-name">Телеграмм</span>
+                        <span class="boost-price" id="tgPrice">500</span>
+                    </div>
+                    <span class="boost-owned" id="tgOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostMisha">
+                    <span class="boost-emoji">🔨</span>
+                    <div class="boost-info">
+                        <span class="boost-name">Миша БДСМ</span>
+                        <span class="boost-price" id="mishaPrice">1488</span>
+                    </div>
+                    <span class="boost-owned" id="mishaOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostTon">
+                    <span class="boost-emoji">💎</span>
+                    <div class="boost-info">
+                        <span class="boost-name">TON</span>
+                        <span class="boost-price" id="tonPrice">5000</span>
+                    </div>
+                    <span class="boost-owned" id="tonOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostSperma">
+                    <span class="boost-emoji">💦</span>
+                    <div class="boost-info">
+                        <span class="boost-name">Сперма Дурова</span>
+                        <span class="boost-price" id="spermaPrice">10000</span>
+                    </div>
+                    <span class="boost-owned" id="spermaOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostPepe">
+                    <span class="boost-emoji">🐸</span>
+                    <div class="boost-info">
+                        <span class="boost-name">Pepe</span>
+                        <span class="boost-price" id="pepePrice">100000</span>
+                    </div>
+                    <span class="boost-owned" id="pepeOwned">0</span>
+                </div>
+            </div>
+
+            <!-- Достижения -->
+            <div class="achievements-section" id="achievementsSection" style="display: none;">
+                <div class="achievements-title">
+                    <span>🏆 ПРОГРЕСС ДОСТИЖЕНИЙ</span>
+                </div>
+                <div class="achievements-grid" id="achievementsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Режим Block Blast (скрыт по умолчанию) -->
+        <div id="blastMode" style="display: none;">
+            <div class="block-blast-mode">
+                <div class="stats-row">
+                    <div class="score-panel">
+                        <span class="score-label">🎯 СЧЁТ</span>
+                        <span class="score-value" id="blastScore">0</span>
+                    </div>
+                    <div class="score-panel">
+                        <span class="score-label">💎 TON</span>
+                        <span class="score-value" id="blastTonDisplay">0</span>
+                    </div>
+                </div>
+
+                <!-- Игровое поле -->
+                <div class="block-grid" id="blockGrid"></div>
+
+                <!-- Следующие блоки -->
+                <div class="next-blocks">
+                    <div class="next-blocks-title">СЛЕДУЮЩИЕ БЛОКИ</div>
+                    <div class="next-blocks-grid" id="nextBlocks"></div>
+                </div>
+
+                <!-- Счет и кнопка конвертации -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="claim-reward-btn" id="convertToTon" style="flex: 2;">💱 КОНВЕРТИРОВАТЬ В TON</button>
+                    <button class="claim-reward-btn" id="newBlocksBtn" style="flex: 1;">🔄 НОВЫЕ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ежедневный бонус (общий для обоих режимов) -->
+        <div class="daily-bonus">
+            <span class="bonus-text">🎁 Ежедневный бонус</span>
+            <button class="bonus-button" id="dailyBonusBtn">ЗАБРАТЬ</button>
+        </div>
+
+        <!-- Общая статистика -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #7890b0; font-size: 0.75rem;">
+            <span>💰 Всего: <span id="totalEarned">0</span></span>
+            <span>⚡ Множитель: <span id="bonusMultiplier">1.0</span>x</span>
+            <span>🎯 Циклов: <span id="cyclesCompleted">0</span></span>
+        </div>
+
+        <div class="footer">
+            💾 Автосохранение | 👆 Два режима - двойной профит!
+        </div>
+    </div>
+
+    <!-- Индикатор автосохранения -->
+    <div class="auto-save-indicator" id="autoSaveIndicator">💾 Сохранено</div>
+
+    <script>
+        (function() {
+            // ========== СОСТОЯНИЕ ИГРЫ ==========
+            let score = 0;
+            let clickPower = 1;
+            let totalEarned = 0;
+            let totalClicks = 0;
+            let cyclesCompleted = 0;
+            let level = 1;
+            let bonusMultiplier = 1.0;
+            
+            // Количество купленных улучшений
+            let owned = {
+                brother: 0,
+                vk: 0,
+                tg: 0,
+                misha: 0,
+                ton: 0,
+                sperma: 0,
+                pepe: 0
+            };
+
+            // Базовая стоимость улучшений
+            const PRICES = {
+                brother: 100,
+                vk: 250,
+                tg: 500,
+                misha: 1488,
+                ton: 5000,
+                sperma: 10000,
+                pepe: 100000
+            };
+
+            // Сколько добавляют улучшений
+            const BOOSTS = {
+                brother: 1,
+                vk: 2,
+                tg: 4,
+                misha: 10,
+                ton: 30,
+                sperma: 100,
+                pepe: 500
+            };
+
+            // Текущие цены
+            let currentPrices = {
+                brother: PRICES.brother,
+                vk: PRICES.vk,
+                tg: PRICES.tg,
+                misha: PRICES.misha,
+                ton: PRICES.ton,
+                sperma: PRICES.sperma,
+                pepe: PRICES.pepe
+            };
+
+            // Для ежедневного бонуса
+            let lastBonusTime = 0;
+            const BONUS_COOLDOWN = 24 * 60 * 60 * 1000;
+
+            // Прогресс-бар
+            let currentProgress = 0;
+            const PROGRESS_MAX = 10000;
+            let cycleReward = 1000;
+
+            // Достижения
+            let achievements = [
+                { id: 'ach1', name: 'Новичок', emoji: '🌱', requirement: 100, type: 'score', unlocked: false },
+                { id: 'ach2', name: 'Энтузиаст', emoji: '🔥', requirement: 1000, type: 'score', unlocked: false },
+                { id: 'ach3', name: 'Богач', emoji: '💰', requirement: 10000, type: 'score', unlocked: false },
+                { id: 'ach4', name: 'Магнат', emoji: '👑', requirement: 100000, type: 'score', unlocked: false },
+                { id: 'ach5', name: 'Кликер', emoji: '👆', requirement: 100, type: 'clicks', unlocked: false },
+                { id: 'ach6', name: 'Кибертапер', emoji: '⚡', requirement: 1000, type: 'clicks', unlocked: false },
+                { id: 'ach7', name: 'Легенда', emoji: '🌟', requirement: 10000, type: 'clicks', unlocked: false },
+                { id: 'ach8', name: 'Коллекционер', emoji: '📦', requirement: 10, type: 'boosts', unlocked: false }
+            ];
+
+            // ========== BLOCK BLAST СОСТОЯНИЕ ==========
+            let blastScore = 0;
+            let blastGrid = Array(25).fill(0); // 5x5 поле
+            let currentBlocks = [];
+            let blockTypes = [
+                // 2x2 блок
+                { shape: [[1,1],[1,1]], color: '#4c7bcb', score: 4 },
+                // 2x1 блок
+                { shape: [[1,1]], color: '#f59e0b', score: 2 },
+                // 1x2 блок
+                { shape: [[1],[1]], color: '#6ee7b7', score: 2 },
+                // 3x1 блок
+                { shape: [[1,1,1]], color: '#ff6b6b', score: 3 },
+                // 1x3 блок
+                { shape: [[1],[1],[1]], color: '#a78bfa', score: 3 },
+                // L-блок
+                { shape: [[1,0],[1,1]], color: '#f472b6', score: 3 }
+            ];
+
+            // ========== DOM ЭЛЕМЕНТЫ ==========
+            const scoreEl = document.getElementById('scoreDisplay');
+            const powerEl = document.getElementById('powerDisplay');
+            const durovCard = document.getElementById('clickableDurov');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const totalEarnedEl = document.getElementById('totalEarned');
+            const bonusMultiplierEl = document.getElementById('bonusMultiplier');
+            const cyclesCompletedEl = document.getElementById('cyclesCompleted');
+            const cycleRewardEl = document.getElementById('cycleReward');
+            const autoSaveIndicator = document.getElementById('autoSaveIndicator');
+            
+            // Элементы бустов
+            const boostElements = {
+                brother: document.getElementById('boostBrother'),
+                vk: document.getElementById('boostVk'),
+                tg: document.getElementById('boostTg'),
+                misha: document.getElementById('boostMisha'),
+                ton: document.getElementById('boostTon'),
+                sperma: document.getElementById('boostSperma'),
+                pepe: document.getElementById('boostPepe')
+            };
+
+            const priceSpans = {
+                brother: document.getElementById('brotherPrice'),
+                vk: document.getElementById('vkPrice'),
+                tg: document.getElementById('tgPrice'),
+                misha: document.getElementById('mishaPrice'),
+                ton: document.getElementById('tonPrice'),
+                sperma: document.getElementById('spermaPrice'),
+                pepe: document.getElementById('pepePrice')
+            };
+
+            const ownedSpans = {
+                brother: document.getElementById('brotherOwned'),
+                vk: document.getElementById('vkOwned'),
+                tg: document.getElementById('tgOwned'),
+                misha: document.getElementById('mishaOwned'),
+                ton: document.getElementById('tonOwned'),
+                sperma: document.getElementById('spermaOwned'),
+                pepe: document.getElementById('pepeOwned')
+            };
+
+            // Элементы режимов
+            const modeClicker = document.getElementById('modeClicker');
+            const modeBlast = document.getElementById('modeBlast');
+            const clickerMode = document.getElementById('clickerMode');
+            const blastMode = document.getElementById('blastMode');
+
+            // Вкладки
+            const tabBoosts = document.getElementById('tabBoosts');
+            const tabAchievements = document.getElementById('tabAchievements');
+            const boostsGrid = document.getElementById('boostsGrid');
+            const achievementsSection = document.getElementById('achievementsSection');
+            const achievementsGrid = document.getElementById('achievementsGrid');
+
+            // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+            function showNotification(message, duration = 2000) {
+                const notification = document.createElement('div');
+                notification.className = 'floating-notification';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), duration);
+            }
+
+            function showSaveIndicator() {
+                autoSaveIndicator.classList.add('show');
+                setTimeout(() => autoSaveIndicator.classList.remove('show'), 2000);
+            }
+
+            function formatNumber(num) {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return num.toString();
+            }
+
+            // ========== ФУНКЦИИ КЛИКЕРА ==========
+            function updateLevel() {
+                const totalBoosts = Object.values(owned).reduce((a, b) => a + b, 0);
+                level = 1 + Math.floor(totalBoosts / 10);
+                bonusMultiplier = 1 + (level * 0.1);
+                bonusMultiplierEl.textContent = bonusMultiplier.toFixed(1);
+            }
+
+            function checkAchievements() {
+                achievements.forEach(ach => {
+                    if (!ach.unlocked) {
+                        let progress = 0;
+                        if (ach.type === 'score') progress = totalEarned;
+                        else if (ach.type === 'clicks') progress = totalClicks;
+                        else if (ach.type === 'boosts') {
+                            progress = Object.values(owned).reduce((a, b) => a + b, 0);
+                        }
+                        
+                        if (progress >= ach.requirement) {
+                            ach.unlocked = true;
+                            showNotification(`🏆 Достижение: ${ach.name}!`, 3000);
+                        }
+                    }
+                });
+                updateAchievementsUI();
+            }
+
+            function updateAchievementsUI() {
+                if (!achievementsGrid) return;
+                achievementsGrid.innerHTML = '';
+                
+                achievements.forEach(ach => {
+                    let progress = 0;
+                    if (ach.type === 'score') progress = totalEarned;
+                    else if (ach.type === 'clicks') progress = totalClicks;
+                    else if (ach.type === 'boosts') {
+                        progress = Object.values(owned).reduce((a, b) => a + b, 0);
+                    }
+                    
+                    const achElement = document.createElement('div');
+                    achElement.className = `achievement-item ${ach.unlocked ? 'unlocked' : ''}`;
+                    achElement.innerHTML = `
+                        <span class="achievement-emoji">${ach.emoji}</span>
+                        <span class="achievement-name">${ach.name}</span>
+                        <span style="font-size: 0.6rem; color: #9bb9ff;">${formatNumber(progress)}/${formatNumber(ach.requirement)}</span>
+                    `;
+                    achievementsGrid.appendChild(achElement);
+                });
+            }
+
+            function refreshUI() {
+                // Основные элементы
+                if (scoreEl) scoreEl.textContent = formatNumber(score);
+                if (powerEl) powerEl.textContent = clickPower;
+                if (totalEarnedEl) totalEarnedEl.textContent = formatNumber(totalEarned);
+                if (cyclesCompletedEl) cyclesCompletedEl.textContent = cyclesCompleted;
+                
+                // Адаптивный размер шрифта
+                if (scoreEl) {
+                    if (score >= 1000000) scoreEl.style.fontSize = '1.9rem';
+                    else if (score >= 10000) scoreEl.style.fontSize = '2.1rem';
+                    else scoreEl.style.fontSize = '2.2rem';
+                }
+
+                // Обновление цен
+                for (let key in priceSpans) {
+                    if (priceSpans[key]) priceSpans[key].textContent = formatNumber(currentPrices[key]);
+                }
+
+                // Обновление количества
+                for (let key in ownedSpans) {
+                    if (ownedSpans[key]) ownedSpans[key].textContent = owned[key];
+                }
+
+                // Обновление прогресс-бара
+                if (progressFill && progressText) {
+                    let progress = (currentProgress / PROGRESS_MAX) * 100;
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = `${formatNumber(currentProgress)} / ${formatNumber(PROGRESS_MAX)}`;
+                }
+
+                // Подсветка недоступных улучшений
+                for (let key in boostElements) {
+                    if (boostElements[key]) {
+                        boostElements[key].classList.toggle('disabled-boost', score < currentPrices[key]);
+                    }
+                }
+
+                // Проверка достижений
+                checkAchievements();
+                updateLevel();
+            }
+
+            function createClickEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.textContent = `+${Math.floor(clickPower * bonusMultiplier)}`;
+                effect.style.left = (x - 20) + 'px';
+                effect.style.top = (y - 30) + 'px';
+                if (durovCard) durovCard.appendChild(effect);
+                setTimeout(() => effect.remove(), 1000);
+            }
+
+            // ========== ОБРАБОТЧИКИ КЛИКЕРА ==========
+            function handleDurovClick(e) {
+                const gain = Math.floor(clickPower * bonusMultiplier);
+                score += gain;
+                totalEarned += gain;
+                totalClicks++;
+                currentProgress += gain;
+                
+                while (currentProgress >= PROGRESS_MAX) {
+                    currentProgress -= PROGRESS_MAX;
+                    cyclesCompleted++;
+                    cycleReward = 1000 + (cyclesCompleted * 100);
+                    if (cycleRewardEl) cycleRewardEl.textContent = cycleReward;
+                    
+                    score += 100;
+                    totalEarned += 100;
+                    
+                    showNotification(`🎉 Цикл ${cyclesCompleted} завершён! +100 TON`, 2000);
+                }
+                
+                const rect = durovCard.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                createClickEffect(x, y);
+                
+                refreshUI();
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+
+            function buyBoost(key) {
+                const cost = currentPrices[key];
+                
+                if (score >= cost) {
+                    score -= cost;
+                    clickPower += BOOSTS[key];
+                    owned[key]++;
+                    
+                    currentPrices[key] = Math.floor(cost * 1.5);
+                    
+                    refreshUI();
+                    if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+                    saveGame();
+                    
+                    showNotification(`✅ ${key} улучшен!`, 1500);
+                    return true;
+                } else {
+                    if (boostElements[key]) {
+                        boostElements[key].style.transform = 'translateX(5px)';
+                        setTimeout(() => {
+                            if (boostElements[key]) boostElements[key].style.transform = '';
+                        }, 150);
+                    }
+                    return false;
+                }
+            }
+
+            function claimReward() {
+                if (currentProgress >= PROGRESS_MAX) {
+                    score += cycleReward;
+                    totalEarned += cycleReward;
+                    currentProgress -= PROGRESS_MAX;
+                    cyclesCompleted++;
+                    cycleReward = 1000 + (cyclesCompleted * 100);
+                    if (cycleRewardEl) cycleRewardEl.textContent = cycleReward;
+                    
+                    refreshUI();
+                    showNotification(`🎁 +${cycleReward} TON получено!`, 2000);
+                }
+            }
+
+            // ========== ФУНКЦИИ BLOCK BLAST ==========
+            function initBlastGame() {
+                blastScore = 0;
+                blastGrid = Array(25).fill(0);
+                generateNewBlocks();
+                updateBlastUI();
+            }
+
+            function generateNewBlocks() {
+                currentBlocks = [];
+                for (let i = 0; i < 3; i++) {
+                    const randomType = Math.floor(Math.random() * blockTypes.length);
+                    currentBlocks.push({...blockTypes[randomType]});
+                }
+                updateBlastUI();
+            }
+
+            function canPlaceBlock(block, startX, startY) {
+                for (let y = 0; y < block.shape.length; y++) {
+                    for (let x = 0; x < block.shape[y].length; x++) {
+                        if (block.shape[y][x] === 1) {
+                            const gridX = startX + x;
+                            const gridY = startY + y;
+                            if (gridX >= 5 || gridY >= 5) return false;
+                            const index = gridY * 5 + gridX;
+                            if (blastGrid[index] === 1) return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function placeBlock(block, startX, startY, blockIndex) {
+                for (let y = 0; y < block.shape.length; y++) {
+                    for (let x = 0; x < block.shape[y].length; x++) {
+                        if (block.shape[y][x] === 1) {
+                            const gridX = startX + x;
+                            const gridY = startY + y;
+                            const index = gridY * 5 + gridX;
+                            blastGrid[index] = 1;
+                        }
+                    }
+                }
+                
+                // Удаляем использованный блок
+                currentBlocks.splice(blockIndex, 1);
+                
+                // Проверяем заполненные линии
+                checkLines();
+                
+                // Если нет блоков, генерируем новые
+                if (currentBlocks.length === 0) {
+                    generateNewBlocks();
+                }
+                
+                updateBlastUI();
+            }
+
+            function checkLines() {
+                let linesCleared = 0;
+                
+                // Проверка горизонтальных линий
+                for (let y = 0; y < 5; y++) {
+                    let full = true;
+                    for (let x = 0; x < 5; x++) {
+                        if (blastGrid[y * 5 + x] === 0) {
+                            full = false;
+                            break;
+                        }
+                    }
+                    if (full) {
+                        linesCleared++;
+                        for (let x = 0; x < 5; x++) {
+                            blastGrid[y * 5 + x] = 0;
+                        }
+                    }
+                }
+                
+                // Проверка вертикальных линий
+                for (let x = 0; x < 5; x++) {
+                    let full = true;
+                    for (let y = 0; y < 5; y++) {
+                        if (blastGrid[y * 5 + x] === 0) {
+                            full = false;
+                            break;
+                        }
+                    }
+                    if (full) {
+                        linesCleared++;
+                        for (let y = 0; y < 5; y++) {
+                            blastGrid[y * 5 + x] = 0;
+                        }
+                    }
+                }
+                
+                if (linesCleared > 0) {
+                    const points = linesCleared * 100;
+                    blastScore += points;
+                    showNotification(`🎯 +${points} очков!`, 1500);
+                }
+            }
+
+            function updateBlastUI() {
+                const gridEl = document.getElementById('blockGrid');
+                const nextBlocksEl = document.getElementById('nextBlocks');
+                const blastScoreEl = document.getElementById('blastScore');
+                const blastTonEl = document.getElementById('blastTonDisplay');
+                
+                if (gridEl) {
+                    gridEl.innerHTML = '';
+                    for (let i = 0; i < 25; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = `block-cell ${blastGrid[i] === 1 ? 'filled' : ''}`;
+                        cell.dataset.index = i;
+                        
+                        cell.addEventListener('click', (e) => {
+                            const index = parseInt(e.target.dataset.index);
+                            const x = index % 5;
+                            const y = Math.floor(index / 5);
+                            
+                            // Пробуем разместить каждый доступный блок
+                            for (let b = 0; b < currentBlocks.length; b++) {
+                                if (canPlaceBlock(currentBlocks[b], x, y)) {
+                                    placeBlock(currentBlocks[b], x, y, b);
+                                    break;
+                                }
+                            }
+                        });
+                        
+                        gridEl.appendChild(cell);
+                    }
+                }
+                
+                if (nextBlocksEl) {
+                    nextBlocksEl.innerHTML = '';
+                    currentBlocks.forEach((block, index) => {
+                        const blockEl = document.createElement('div');
+                        blockEl.className = 'next-block-item';
+                        
+                        const preview = document.createElement('div');
+                        preview.className = 'next-block-preview';
+                        
+                        // Создаем превью 2x2
+                        for (let y = 0; y < 2; y++) {
+                            for (let x = 0; x < 2; x++) {
+                                const cell = document.createElement('div');
+                                cell.className = 'preview-cell';
+                                if (block.shape[y] && block.shape[y][x] === 1) {
+                                    cell.classList.add('active');
+                                }
+                                preview.appendChild(cell);
+                            }
+                        }
+                        
+                        const score = document.createElement('div');
+                        score.className = 'block-score';
+                        score.textContent = `+${block.score}`;
+                        
+                        blockEl.appendChild(preview);
+                        blockEl.appendChild(score);
+                        nextBlocksEl.appendChild(blockEl);
+                    });
+                }
+                
+                if (blastScoreEl) blastScoreEl.textContent = blastScore;
+                if (blastTonEl) blastTonEl.textContent = formatNumber(score);
+            }
+
+            function convertBlastToTon() {
+                const conversionRate = 10; // 10 очков = 1 TON
+                const tonToAdd = Math.floor(blastScore / conversionRate);
+                
+                if (tonToAdd > 0) {
+                    score += tonToAdd;
+                    totalEarned += tonToAdd;
+                    blastScore = 0;
+                    
+                    refreshUI();
+                    updateBlastUI();
+                    showNotification(`💱 Конвертировано: +${tonToAdd} TON!`, 2000);
+                }
+            }
+
+            // ========== СОХРАНЕНИЕ ==========
+            function saveGame() {
+                const saveData = {
+                    score: score,
+                    clickPower: clickPower,
+                    totalEarned: totalEarned,
+                    totalClicks: totalClicks,
+                    cyclesCompleted: cyclesCompleted,
+                    currentProgress: currentProgress,
+                    owned: owned,
+                    currentPrices: currentPrices,
+                    lastBonusTime: lastBonusTime,
+                    achievements: achievements,
+                    blastScore: blastScore,
+                    blastGrid: blastGrid
+                };
+                
+                localStorage.setItem('durovClickerSave', JSON.stringify(saveData));
+                showSaveIndicator();
+                console.log('Игра сохранена');
+            }
+
+            function loadGame() {
+                const saved = localStorage.getItem('durovClickerSave');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        
+                        score = data.score || 0;
+                        clickPower = data.clickPower || 1;
+                        totalEarned = data.totalEarned || 0;
+                        totalClicks = data.totalClicks || 0;
+                        cyclesCompleted = data.cyclesCompleted || 0;
+                        currentProgress = data.currentProgress || 0;
+                        owned = data.owned || { brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0 };
+                        currentPrices = data.currentPrices || {
+                            brother: PRICES.brother,
+                            vk: PRICES.vk,
+                            tg: PRICES.tg,
+                            misha: PRICES.misha,
+                            ton: PRICES.ton,
+                            sperma: PRICES.sperma,
+                            pepe: PRICES.pepe
+                        };
+                        lastBonusTime = data.lastBonusTime || 0;
+                        
+                        if (data.achievements) achievements = data.achievements;
+                        
+                        // Загрузка Blast данных
+                        blastScore = data.blastScore || 0;
+                        if (data.blastGrid) blastGrid = data.blastGrid;
+                        
+                        cycleReward = 1000 + (cyclesCompleted * 100);
+                        if (cycleRewardEl) cycleRewardEl.textContent = cycleReward;
+                        
+                        refreshUI();
+                        updateAchievementsUI();
+                        generateNewBlocks();
+                        updateBlastUI();
+                        
+                        showNotification('📂 Прогресс загружен!', 1500);
+                    } catch (e) {
+                        console.error('Ошибка загрузки:', e);
+                    }
+                } else {
+                    generateNewBlocks();
+                    updateBlastUI();
+                }
+            }
+
+            // ========== ЕЖЕДНЕВНЫЙ БОНУС ==========
+            function claimDailyBonus() {
+                const now = Date.now();
+                const bonusBtn = document.getElementById('dailyBonusBtn');
+                
+                if (now - lastBonusTime >= BONUS_COOLDOWN) {
+                    const bonusAmount = 5000;
+                    score += bonusAmount;
+                    totalEarned += bonusAmount;
+                    lastBonusTime = now;
+                    
+                    refreshUI();
+                    saveGame();
+                    
+                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    showNotification(`🎁 Ежедневный бонус: +${bonusAmount} TON!`, 3000);
+                    
+                    if (bonusBtn) {
+                        bonusBtn.classList.add('disabled');
+                        bonusBtn.textContent = '⏳ 24ч';
+                    }
+                }
+            }
+
+            // ========== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ==========
+            modeClicker.addEventListener('click', () => {
+                modeClicker.classList.add('active');
+                modeBlast.classList.remove('active');
+                clickerMode.style.display = 'block';
+                blastMode.style.display = 'none';
+            });
+
+            modeBlast.addEventListener('click', () => {
+                modeBlast.classList.add('active');
+                modeClicker.classList.remove('active');
+                clickerMode.style.display = 'none';
+                blastMode.style.display = 'block';
+                updateBlastUI();
+            });
+
+            // ========== НАЗНАЧЕНИЕ ОБРАБОТЧИКОВ ==========
+            if (durovCard) durovCard.addEventListener('click', handleDurovClick);
+
+            // Улучшения
+            for (let key in boostElements) {
+                if (boostElements[key]) {
+                    boostElements[key].addEventListener('click', () => buyBoost(key));
+                }
+            }
+
+            // Кнопки кликера
+            const claimBtn = document.getElementById('claimCycleReward');
+            if (claimBtn) claimBtn.addEventListener('click', claimReward);
+
+            // Вкладки
+            if (tabBoosts) {
+                tabBoosts.addEventListener('click', () => {
+                    tabBoosts.classList.add('active');
+                    tabAchievements.classList.remove('active');
+                    if (boostsGrid) boostsGrid.style.display = 'grid';
+                    if (achievementsSection) achievementsSection.style.display = 'none';
+                });
+            }
+
+            if (tabAchievements) {
+                tabAchievements.addEventListener('click', () => {
+                    tabAchievements.classList.add('active');
+                    tabBoosts.classList.remove('active');
+                    if (boostsGrid) boostsGrid.style.display = 'none';
+                    if (achievementsSection) achievementsSection.style.display = 'block';
+                    updateAchievementsUI();
+                });
+            }
+
+            // Block Blast кнопки
+            const convertBtn = document.getElementById('convertToTon');
+            if (convertBtn) convertBtn.addEventListener('click', convertBlastToTon);
+
+            const newBlocksBtn = document.getElementById('newBlocksBtn');
+            if (newBlocksBtn) {
+                newBlocksBtn.addEventListener('click', () => {
+                    generateNewBlocks();
+                    if (navigator.vibrate) navigator.vibrate(20);
+                });
+            }
+
+            // Ежедневный бонус
+            const dailyBonusBtn = document.getElementById('dailyBonusBtn');
+            if (dailyBonusBtn) dailyBonusBtn.addEventListener('click', claimDailyBonus);
+
+            // Сброс по тройному тапу
+            const gameTitle = document.getElementById('gameTitle');
+            if (gameTitle) {
+                let headerTapCount = 0;
+                let headerTapTimer;
+                
+                gameTitle.addEventListener('click', () => {
+                    headerTapCount++;
+                    clearTimeout(headerTapTimer);
+                    headerTapTimer = setTimeout(() => {
+                        if (headerTapCount >= 3) {
+                            if (confirm('Сбросить весь прогресс?')) {
+                                score = 0;
+                                clickPower = 1;
+                                totalEarned = 0;
+                                totalClicks = 0;
+                                cyclesCompleted = 0;
+                                currentProgress = 0;
+                                owned = { brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0 };
+                                currentPrices = {
+                                    brother: PRICES.brother,
+                                    vk: PRICES.vk,
+                                    tg: PRICES.tg,
+                                    misha: PRICES.misha,
+                                    ton: PRICES.ton,
+                                    sperma: PRICES.sperma,
+                                    pepe: PRICES.pepe
+                                };
+                                achievements.forEach(ach => ach.unlocked = false);
+                                blastScore = 0;
+                                blastGrid = Array(25).fill(0);
+                                
+                                cycleReward = 1000;
+                                if (cycleRewardEl) cycleRewardEl.textContent = cycleReward;
+                                
+                                refreshUI();
+                                updateAchievementsUI();
+                                generateNewBlocks();
+                                updateBlastUI();
+                                saveGame();
+                                
+                                showNotification('🔄 Прогресс сброшен', 2000);
+                            }
+                        }
+                        headerTapCount = 0;
+                    }, 500);
+                });
+            }
+
+            // ========== ИНИЦИАЛИЗАЦИЯ ==========
+            function initialize() {
+                loadGame();
+                refreshUI();
+                updateAchievementsUI();
+                
+                // Проверка ежедневного бонуса
+                const now = Date.now();
+                const bonusBtn = document.getElementById('dailyBonusBtn');
+                if (bonusBtn) {
+                    if (now - lastBonusTime < BONUS_COOLDOWN) {
+                        bonusBtn.classList.add('disabled');
+                        const hoursLeft = Math.ceil((BONUS_COOLDOWN - (now - lastBonusTime)) / (1000 * 60 * 60));
+                        bonusBtn.textContent = `⏳ ${hoursLeft}ч`;
+                    }
+                }
+                
+                setTimeout(() => showNotification('👋 Добро пожаловать!', 2000), 500);
+            }
+
+            // Автосохранение
+            setInterval(saveGame, 15000);
+            window.addEventListener('beforeunload', saveGame);
+
+            // Запуск
+            initialize();
+        })();
+    </script>
+</body>
+</html>
