@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Durov Clicker 2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            margin: 0;
+        }
+
+        .game-container {
+            background: rgba(18, 25, 45, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 20px 16px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.8), inset 0 1px 3px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(66, 135, 245, 0.4);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px #2563eb;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #7890b0;
+            font-size: 0.85rem;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .score-panel {
+            background: #0b1425;
+            border-radius: 30px;
+            padding: 12px 18px;
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #2d4379;
+            box-shadow: inset 0 3px 0 #040814, 0 6px 0 #040a18;
+        }
+
+        .score-label {
+            color: #9bb9ff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            background: #1e2b48;
+            padding: 6px 12px;
+            border-radius: 25px;
+            white-space: nowrap;
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #fed7aa;
+            text-shadow: 0 0 15px #f59e0b;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+            max-width: 180px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0 5px;
+            scrollbar-width: none;
+        }
+        
+        .score-value::-webkit-scrollbar {
+            display: none;
+        }
+
+        .click-power-panel {
+            background: #0b1425;
+            border-radius: 30px;
+            padding: 12px 15px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border: 2px solid #2d4379;
+            box-shadow: inset 0 3px 0 #040814, 0 6px 0 #040a18;
+        }
+
+        .power-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #6ee7b7;
+            text-shadow: 0 0 15px #059669;
+        }
+
+        .power-label {
+            font-size: 1rem;
+            color: #9bb9ff;
+        }
+
+        .durov-card {
+            background: #111c34;
+            border-radius: 40px;
+            padding: 15px 15px 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 3px solid #3a5a9a;
+            box-shadow: 0 10px 0 #0a1222, 0 15px 25px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .durov-card:active {
+            transform: translateY(7px);
+            box-shadow: 0 3px 0 #0a1222, 0 10px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .durov-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 30px;
+            overflow: hidden;
+            background: #1f2b44;
+            padding: 10px;
+        }
+
+        .durov-photo {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 30px;
+            border: 4px solid #4c7bcb;
+            object-fit: cover;
+            transition: transform 0.2s;
+            display: block;
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd966;
+            text-shadow: 0 0 15px #f59e0b;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5);
+            }
+        }
+
+        .progress-bar {
+            background: #1a2742;
+            height: 20px;
+            border-radius: 30px;
+            margin: 15px 0 10px;
+            overflow: hidden;
+            border: 1px solid #3a5a9a;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4c7bcb, #9bb9ff);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 15px #4c7bcb;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px black;
+            z-index: 2;
+        }
+
+        .boosts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #4f6eae #1a2742;
+        }
+
+        .boosts-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-track {
+            background: #1a2742;
+            border-radius: 10px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-thumb {
+            background: #4f6eae;
+            border-radius: 10px;
+        }
+
+        .boost-item {
+            background: #16233f;
+            border-radius: 24px;
+            padding: 14px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #3d5c96;
+            box-shadow: 0 6px 0 #0d172a;
+            transition: 0.08s linear;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .boost-item:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0d172a;
+        }
+
+        .boost-emoji {
+            font-size: 1.8rem;
+            filter: drop-shadow(2px 4px 3px black);
+            margin-bottom: 4px;
+        }
+
+        .boost-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .boost-name {
+            font-weight: 700;
+            color: white;
+            font-size: 0.85rem;
+            text-align: center;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            word-break: break-word;
+        }
+
+        .boost-price {
+            color: #ffbe76;
+            font-weight: 800;
+            font-size: 1rem;
+            background: #00000040;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin-top: 6px;
+            border: 1px solid #f39c12;
+            width: fit-content;
+        }
+
+        .boost-price::before {
+            content: "💰 ";
+            font-size: 0.7rem;
+        }
+
+        .boost-owned {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #4c7bcb;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .disabled-boost {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.7);
+            border-color: #555;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .reset-button, .save-button, .load-button {
+            background: #263b60;
+            border: none;
+            color: #f0f4ff;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 14px 0;
+            flex: 1;
+            border-radius: 40px;
+            cursor: pointer;
+            border: 2px solid #6783c9;
+            box-shadow: 0 5px 0 #121d33;
+            transition: 0.08s linear;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reset-button:active, .save-button:active, .load-button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #121d33;
+        }
+
+        .save-button {
+            background: #1e3a5f;
+            border-color: #4c7bcb;
+        }
+
+        .load-button {
+            background: #2d4a3e;
+            border-color: #2ecc71;
+        }
+
+        .daily-bonus {
+            background: #1e2b48;
+            border-radius: 25px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #4c7bcb;
+        }
+
+        .bonus-text {
+            color: #9bb9ff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .bonus-button {
+            background: #4c7bcb;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #2d4379;
+            cursor: pointer;
+            transition: 0.08s linear;
+        }
+
+        .bonus-button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2d4379;
+        }
+
+        .bonus-button.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #50648b;
+            font-size: 0.75rem;
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #1e3a5f;
+            color: #9bb9ff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            border: 1px solid #4c7bcb;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .auto-save-indicator.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">DUROV CLICKER 2.0</h1>
+            <div class="subtitle">блокчейн в каждом тапе</div>
+        </div>
+
+        <div class="stats-row">
+            <div class="score-panel">
+                <span class="score-label">🪙 TON</span>
+                <span class="score-value" id="scoreDisplay">0</span>
+            </div>
+            <div class="click-power-panel">
+                <span class="power-value" id="powerDisplay">1</span>
+                <span class="power-label">⚡</span>
+            </div>
+        </div>
+
+        <!-- Кликабельный Дуров с загрузкой из нескольких источников -->
+        <div class="durov-card" id="clickableDurov">
+            <div class="durov-image">
+                <img class="durov-photo" 
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%232d3748'/%3E%3Ccircle cx='150' cy='150' r='100' fill='%233a5a9a'/%3E%3Ccircle cx='120' cy='130' r='15' fill='white'/%3E%3Ccircle cx='180' cy='130' r='15' fill='white'/%3E%3Ccircle cx='125' cy='135' r='5' fill='black'/%3E%3Ccircle cx='175' cy='135' r='5' fill='black'/%3E%3Cpath d='M120 180 Q150 200, 180 180' stroke='white' stroke-width='5' fill='none'/%3E%3Ctext x='80' y='250' fill='white' font-size='20' font-family='Arial'%3EPAVEL DUROV%3C/text%3E%3C/svg%3E"
+                     alt="Павел Дуров"
+                     id="durovImage"
+                     onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Pavel_Durov_2013.jpg/800px-Pavel_Durov_2013.jpg'; this.onerror=function(){this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgUq4qCklwQJ1bQO9tYgK3qQkX9wXbQoXtTw&s'}">
+            </div>
+            <div class="click-hint" style="text-align: center; color: #d4e2ff; font-weight: 600; margin-top: 10px; background: #1e3260; padding: 8px 20px; border-radius: 30px; width: fit-content; margin-left: auto; margin-right: auto;">
+                👆 ТАПАЙ ПО ДУРОВУ 👆
+            </div>
+        </div>
+
+        <!-- Прогресс-бар -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            <span class="progress-text" id="progressText">0 / 10000</span>
+        </div>
+
+        <!-- Ежедневный бонус -->
+        <div class="daily-bonus">
+            <span class="bonus-text">🎁 Ежедневный бонус</span>
+            <button class="bonus-button" id="dailyBonusBtn">ЗАБРАТЬ</button>
+        </div>
+
+        <!-- Улучшения -->
+        <div class="boosts-grid" id="boostsGrid">
+            <div class="boost-item" id="boostBrother">
+                <span class="boost-emoji">👥</span>
+                <div class="boost-info">
+                    <span class="boost-name">Брат Дурова</span>
+                    <span class="boost-price" id="brotherPrice">100</span>
+                </div>
+                <span class="boost-owned" id="brotherOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostVk">
+                <span class="boost-emoji">📘</span>
+                <div class="boost-info">
+                    <span class="boost-name">ВК</span>
+                    <span class="boost-price" id="vkPrice">250</span>
+                </div>
+                <span class="boost-owned" id="vkOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostTg">
+                <span class="boost-emoji">✈️</span>
+                <div class="boost-info">
+                    <span class="boost-name">Телеграмм</span>
+                    <span class="boost-price" id="tgPrice">500</span>
+                </div>
+                <span class="boost-owned" id="tgOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostMisha">
+                <span class="boost-emoji">🔨</span>
+                <div class="boost-info">
+                    <span class="boost-name">Миша БДСМ</span>
+                    <span class="boost-price" id="mishaPrice">1488</span>
+                </div>
+                <span class="boost-owned" id="mishaOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostTon">
+                <span class="boost-emoji">💎</span>
+                <div class="boost-info">
+                    <span class="boost-name">TON</span>
+                    <span class="boost-price" id="tonPrice">5000</span>
+                </div>
+                <span class="boost-owned" id="tonOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostSperma">
+                <span class="boost-emoji">💦</span>
+                <div class="boost-info">
+                    <span class="boost-name">Сперма Дурова</span>
+                    <span class="boost-price" id="spermaPrice">10000</span>
+                </div>
+                <span class="boost-owned" id="spermaOwned">0</span>
+            </div>
+            <div class="boost-item" id="boostPepe">
+                <span class="boost-emoji">🐸</span>
+                <div class="boost-info">
+                    <span class="boost-name">Pepe</span>
+                    <span class="boost-price" id="pepePrice">100000</span>
+                </div>
+                <span class="boost-owned" id="pepeOwned">0</span>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="action-buttons">
+            <button class="reset-button" id="resetGame">🔄 СБРОС</button>
+            <button class="save-button" id="saveGame">💾 СОХРАНИТЬ</button>
+            <button class="load-button" id="loadGame">📂 ЗАГРУЗИТЬ</button>
+        </div>
+        
+        <!-- Статистика -->
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; color: #7890b0; font-size: 0.8rem;">
+            <span>💰 Всего заработано: <span id="totalEarned">0</span></span>
+            <span>👆 Кликов: <span id="totalClicks">0</span></span>
+        </div>
+
+        <div class="footer">
+            💾 Прогресс сохраняется автоматически!
+        </div>
+    </div>
+
+    <!-- Индикатор автосохранения -->
+    <div class="auto-save-indicator" id="autoSaveIndicator">💾 Сохранено</div>
+
+    <script>
+        (function() {
+            // Состояние игры
+            let score = 0;
+            let clickPower = 1;
+            let totalEarned = 0;
+            let totalClicks = 0;
+            
+            // Количество купленных улучшений
+            let owned = {
+                brother: 0,
+                vk: 0,
+                tg: 0,
+                misha: 0,
+                ton: 0,
+                sperma: 0,
+                pepe: 0
+            };
+
+            // Базовая стоимость улучшений
+            const PRICES = {
+                brother: 100,
+                vk: 250,
+                tg: 500,
+                misha: 1488,
+                ton: 5000,
+                sperma: 10000,
+                pepe: 100000
+            };
+
+            // Сколько добавляют улучшений
+            const BOOSTS = {
+                brother: 1,
+                vk: 2,
+                tg: 4,
+                misha: 10,
+                ton: 30,
+                sperma: 100,
+                pepe: 500
+            };
+
+            // Текущие цены
+            let currentPrices = {
+                brother: PRICES.brother,
+                vk: PRICES.vk,
+                tg: PRICES.tg,
+                misha: PRICES.misha,
+                ton: PRICES.ton,
+                sperma: PRICES.sperma,
+                pepe: PRICES.pepe
+            };
+
+            // Для ежедневного бонуса
+            let lastBonusTime = 0;
+            const BONUS_COOLDOWN = 24 * 60 * 60 * 1000; // 24 часа
+
+            // DOM элементы
+            const scoreEl = document.getElementById('scoreDisplay');
+            const powerEl = document.getElementById('powerDisplay');
+            const durovCard = document.getElementById('clickableDurov');
+            const durovImage = document.getElementById('durovImage');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const totalEarnedEl = document.getElementById('totalEarned');
+            const totalClicksEl = document.getElementById('totalClicks');
+            const autoSaveIndicator = document.getElementById('autoSaveIndicator');
+            
+            // Элементы бустов
+            const boostElements = {
+                brother: document.getElementById('boostBrother'),
+                vk: document.getElementById('boostVk'),
+                tg: document.getElementById('boostTg'),
+                misha: document.getElementById('boostMisha'),
+                ton: document.getElementById('boostTon'),
+                sperma: document.getElementById('boostSperma'),
+                pepe: document.getElementById('boostPepe')
+            };
+
+            // Ценовые спаны
+            const priceSpans = {
+                brother: document.getElementById('brotherPrice'),
+                vk: document.getElementById('vkPrice'),
+                tg: document.getElementById('tgPrice'),
+                misha: document.getElementById('mishaPrice'),
+                ton: document.getElementById('tonPrice'),
+                sperma: document.getElementById('spermaPrice'),
+                pepe: document.getElementById('pepePrice')
+            };
+
+            // Спаны количества
+            const ownedSpans = {
+                brother: document.getElementById('brotherOwned'),
+                vk: document.getElementById('vkOwned'),
+                tg: document.getElementById('tgOwned'),
+                misha: document.getElementById('mishaOwned'),
+                ton: document.getElementById('tonOwned'),
+                sperma: document.getElementById('spermaOwned'),
+                pepe: document.getElementById('pepeOwned')
+            };
+
+            // Загрузка изображения из нескольких источников
+            function loadDurovImage() {
+                const sources = [
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Pavel_Durov_2013.jpg/800px-Pavel_Durov_2013.jpg',
+                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgUq4qCklwQJ1bQO9tYgK3qQkX9wXbQoXtTw&s',
+                    'https://www.biography.com/.image/t_share/MTQ3MzM3NTkxNTc5NDk1ODI2/pavel_durov_photo_by_caters_news_agency.jpg'
+                ];
+                
+                let currentSource = 0;
+                
+                function tryLoad() {
+                    if (currentSource >= sources.length) {
+                        // Если ничего не загрузилось, оставляем SVG
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    img.onload = function() {
+                        durovImage.src = sources[currentSource];
+                    };
+                    img.onerror = function() {
+                        currentSource++;
+                        tryLoad();
+                    };
+                    img.src = sources[currentSource];
+                }
+                
+                tryLoad();
+            }
+
+            // Функция создания эффекта при клике
+            function createClickEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.textContent = `+${clickPower}`;
+                effect.style.left = (x - 20) + 'px';
+                effect.style.top = (y - 30) + 'px';
+                durovCard.appendChild(effect);
+                
+                setTimeout(() => {
+                    effect.remove();
+                }, 1000);
+            }
+
+            // Показать индикатор сохранения
+            function showSaveIndicator() {
+                autoSaveIndicator.classList.add('show');
+                setTimeout(() => {
+                    autoSaveIndicator.classList.remove('show');
+                }, 2000);
+            }
+
+            // Обновление отображения
+            function refreshUI() {
+                // Форматирование чисел
+                scoreEl.textContent = formatNumber(score);
+                powerEl.textContent = clickPower;
+                totalEarnedEl.textContent = formatNumber(totalEarned);
+                totalClicksEl.textContent = formatNumber(totalClicks);
+                
+                // Адаптивный размер шрифта
+                if (score >= 1000000) {
+                    scoreEl.style.fontSize = '2rem';
+                } else if (score >= 10000) {
+                    scoreEl.style.fontSize = '2.2rem';
+                } else {
+                    scoreEl.style.fontSize = '2.5rem';
+                }
+
+                // Обновление цен
+                for (let key in priceSpans) {
+                    priceSpans[key].textContent = formatNumber(currentPrices[key]);
+                }
+
+                // Обновление количества
+                for (let key in ownedSpans) {
+                    ownedSpans[key].textContent = owned[key];
+                }
+
+                // Обновление прогресс-бара (цель - 10000)
+                let progress = (score % 10000) / 10000 * 100;
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `${formatNumber(score % 10000)} / 10000`;
+
+                // Подсветка недоступных улучшений
+                for (let key in boostElements) {
+                    boostElements[key].classList.toggle('disabled-boost', score < currentPrices[key]);
+                }
+
+                // Проверка ежедневного бонуса
+                const now = Date.now();
+                const bonusBtn = document.getElementById('dailyBonusBtn');
+                if (now - lastBonusTime < BONUS_COOLDOWN) {
+                    bonusBtn.classList.add('disabled');
+                    bonusBtn.textContent = '⏳ ЖДИ';
+                } else {
+                    bonusBtn.classList.remove('disabled');
+                    bonusBtn.textContent = 'ЗАБРАТЬ';
+                }
+            }
+
+            // Форматирование чисел
+            function formatNumber(num) {
+                if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1) + 'M';
+                }
+                if (num >= 1000) {
+                    return (num / 1000).toFixed(1) + 'K';
+                }
+                return num.toString();
+            }
+
+            // Обработчик клика
+            function handleDurovClick(e) {
+                score += clickPower;
+                totalEarned += clickPower;
+                totalClicks++;
+                
+                // Координаты для эффекта
+                const rect = durovCard.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                createClickEffect(x, y);
+                
+                refreshUI();
+
+                // Вибро
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+
+            // Покупка улучшения
+            function buyBoost(key) {
+                const cost = currentPrices[key];
+                
+                if (score >= cost) {
+                    score -= cost;
+                    clickPower += BOOSTS[key];
+                    owned[key]++;
+                    
+                    // Увеличиваем цену
+                    currentPrices[key] = Math.floor(cost * 1.5);
+                    
+                    refreshUI();
+                    
+                    if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+                    
+                    // Автосохранение после покупки
+                    saveGame();
+                    
+                    return true;
+                } else {
+                    // Анимация ошибки
+                    boostElements[key].style.transform = 'translateX(5px)';
+                    setTimeout(() => boostElements[key].style.transform = '', 150);
+                    return false;
+                }
+            }
+
+            // Сохранение игры
+            function saveGame() {
+                const saveData = {
+                    score: score,
+                    clickPower: clickPower,
+                    totalEarned: totalEarned,
+                    totalClicks: totalClicks,
+                    owned: owned,
+                    currentPrices: currentPrices,
+                    lastBonusTime: lastBonusTime
+                };
+                
+                localStorage.setItem('durovClickerSave', JSON.stringify(saveData));
+                
+                // Показываем индикатор
+                showSaveIndicator();
+                
+                // Визуальный фидбек на кнопке
+                const saveBtn = document.getElementById('saveGame');
+                saveBtn.textContent = '✅ СОХРАНЕНО';
+                setTimeout(() => {
+                    saveBtn.textContent = '💾 СОХРАНИТЬ';
+                }, 1000);
+                
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+                console.log('Игра сохранена:', saveData); // Для отладки
+            }
+
+            // Загрузка игры
+            function loadGame() {
+                const saved = localStorage.getItem('durovClickerSave');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        
+                        // Восстанавливаем все значения
+                        score = data.score || 0;
+                        clickPower = data.clickPower || 1;
+                        totalEarned = data.totalEarned || 0;
+                        totalClicks = data.totalClicks || 0;
+                        owned = data.owned || {
+                            brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0
+                        };
+                        currentPrices = data.currentPrices || {
+                            brother: PRICES.brother,
+                            vk: PRICES.vk,
+                            tg: PRICES.tg,
+                            misha: PRICES.misha,
+                            ton: PRICES.ton,
+                            sperma: PRICES.sperma,
+                            pepe: PRICES.pepe
+                        };
+                        lastBonusTime = data.lastBonusTime || 0;
+                        
+                        refreshUI();
+                        
+                        // Визуальный фидбек
+                        const loadBtn = document.getElementById('loadGame');
+                        loadBtn.textContent = '✅ ЗАГРУЖЕНО';
+                        setTimeout(() => {
+                            loadBtn.textContent = '📂 ЗАГРУЗИТЬ';
+                        }, 1000);
+                        
+                        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                        
+                        console.log('Игра загружена:', data); // Для отладки
+                        
+                    } catch (e) {
+                        console.error('Ошибка загрузки:', e);
+                        alert('Ошибка при загрузке сохранения');
+                    }
+                } else {
+                    alert('Нет сохранённой игры');
+                }
+            }
+
+            // Ежедневный бонус
+            function claimDailyBonus() {
+                const now = Date.now();
+                if (now - lastBonusTime >= BONUS_COOLDOWN) {
+                    const bonusAmount = 5000;
+                    score += bonusAmount;
+                    totalEarned += bonusAmount;
+                    lastBonusTime = now;
+                    
+                    refreshUI();
+                    saveGame(); // Сохраняем после получения бонуса
+                    
+                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    
+                    alert(`🎉 Вы получили ${bonusAmount} TON за ежедневный вход!`);
+                }
+            }
+
+            // Сброс игры
+            function resetGame() {
+                if (confirm('Точно сбросить весь прогресс?')) {
+                    score = 0;
+                    clickPower = 1;
+                    totalEarned = 0;
+                    totalClicks = 0;
+                    owned = {
+                        brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0
+                    };
+                    currentPrices = {
+                        brother: PRICES.brother,
+                        vk: PRICES.vk,
+                        tg: PRICES.tg,
+                        misha: PRICES.misha,
+                        ton: PRICES.ton,
+                        sperma: PRICES.sperma,
+                        pepe: PRICES.pepe
+                    };
+                    
+                    refreshUI();
+                    saveGame(); // Сохраняем после сброса
+                    
+                    if (navigator.vibrate) navigator.vibrate(100);
+                }
+            }
+
+            // Назначение обработчиков
+            durovCard.addEventListener('click', handleDurovClick);
+
+            // Обработчики для всех улучшений
+            for (let key in boostElements) {
+                boostElements[key].addEventListener('click', () => buyBoost(key));
+            }
+
+            // Кнопки
+            document.getElementById('resetGame').addEventListener('click', resetGame);
+            document.getElementById('saveGame').addEventListener('click', saveGame);
+            document.getElementById('loadGame').addEventListener('click', loadGame);
+            document.getElementById('dailyBonusBtn').addEventListener('click', claimDailyBonus);
+
+            // Загружаем игру при старте
+            function initialize() {
+                loadGame(); // Загружаем сохранение
+                loadDurovImage(); // Загружаем фото
+                refreshUI(); // Обновляем интерфейс
+                
+                console.log('Игра инициализирована');
+            }
+
+            // Автосохранение каждые 15 секунд
+            setInterval(saveGame, 15000);
+
+            // Сохраняем при закрытии страницы
+            window.addEventListener('beforeunload', function() {
+                saveGame();
+            });
+
+            // Запускаем инициализацию
+            initialize();
+        })();
+    </script>
+</body>
+</html>
