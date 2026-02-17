@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кликер с Павлом Дуровым</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #2b2b3a 0%, #1a1a2a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 30px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f0f0ff, #aaccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px #3a86ff;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #b0c4de;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .score-panel {
+            background: #0f172a;
+            border-radius: 100px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #3a4a6b;
+            box-shadow: inset 0 5px 0 #0b101f, 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-label {
+            color: #9bb5ff;
+            font-weight: 600;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #ffd966;
+            text-shadow: 0 0 20px #ffb347;
+            line-height: 1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .durov-card {
+            background: #16213e;
+            border-radius: 80px 80px 40px 40px;
+            padding: 25px 25px 35px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 4px solid #415a77;
+            box-shadow: 0 20px 0 #0d1b2a, 0 25px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .durov-card:active {
+            transform: translateY(15px);
+            box-shadow: 0 5px 0 #0d1b2a, 0 20px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .durov-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 15px 10px rgba(0, 0, 0, 0.7));
+        }
+
+        .durov-svg {
+            width: 70%;
+            max-width: 280px;
+            height: auto;
+            transition: transform 0.2s;
+        }
+
+        .durov-card:active .durov-svg {
+            transform: scale(0.97);
+        }
+
+        .click-hint {
+            text-align: center;
+            color: #b8c7e3;
+            font-weight: 500;
+            margin-top: 15px;
+            background: #0f3460;
+            display: inline-block;
+            padding: 8px 30px;
+            border-radius: 50px;
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+            border: 1px solid #4e73b0;
+        }
+
+        .boosts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .boost-item {
+            background: #1e2b41;
+            border-radius: 40px;
+            padding: 18px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #546e9b;
+            box-shadow: 0 8px 0 #0f1a2c;
+            transition: 0.08s linear;
+            cursor: pointer;
+        }
+
+        .boost-item:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0f1a2c;
+        }
+
+        .boost-emoji {
+            font-size: 2.2rem;
+            filter: drop-shadow(2px 4px 4px black);
+        }
+
+        .boost-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .boost-name {
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .boost-price {
+            color: #ffb870;
+            font-weight: 800;
+            font-size: 1.2rem;
+            background: #00000040;
+            padding: 3px 15px;
+            border-radius: 40px;
+            margin-top: 6px;
+        }
+
+        .boost-price::before {
+            content: "💰 ";
+            font-size: 0.9rem;
+        }
+
+        .disabled-boost {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.6);
+        }
+
+        .reset-button {
+            background: #2a3f5e;
+            border: none;
+            color: #edf2fb;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px 0;
+            width: 100%;
+            border-radius: 60px;
+            cursor: pointer;
+            border: 2px solid #5f7bb3;
+            box-shadow: 0 7px 0 #14202e;
+            transition: 0.08s linear;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .reset-button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #14202e;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #687a9c;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">Durov Clicker</h1>
+            <div class="subtitle">Тапай по Павлу, строй империю</div>
+        </div>
+
+        <div class="score-panel">
+            <span class="score-label">🪙 ТОНкоины</span>
+            <span class="score-value" id="scoreDisplay">0</span>
+        </div>
+
+        <!-- Кликабельный Дуров (SVG-стилизация) -->
+        <div class="durov-card" id="clickableDurov">
+            <div class="durov-image">
+                <!-- Стилизованное векторное изображение Павла Дурова -->
+                <svg class="durov-svg" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Тень под головой (эффект) -->
+                    <circle cx="150" cy="170" r="70" fill="#0a0e1a" opacity="0.4" filter="url(#blur)" />
+                    <!-- Голова -->
+                    <circle cx="150" cy="140" r="70" fill="#3b2e24" stroke="#222" stroke-width="3"/>
+                    <!-- Шея/воротник (водолазка) -->
+                    <rect x="125" y="190" width="50" height="30" fill="#1f1f2e" stroke="#111" stroke-width="2" rx="10"/>
+                    <!-- Тело (пиджак) -->
+                    <path d="M100 220 L200 220 L185 280 L115 280 L100 220" fill="#0b2545" stroke="#051024" stroke-width="3"/>
+                    <!-- Лицо: глаза -->
+                    <circle cx="120" cy="120" r="10" fill="white" stroke="#132" stroke-width="2"/>
+                    <circle cx="180" cy="120" r="10" fill="white" stroke="#132" stroke-width="2"/>
+                    <circle cx="125" cy="125" r="4" fill="black"/>
+                    <circle cx="175" cy="125" r="4" fill="black"/>
+                    <!-- Улыбка (нейтральная/лёгкая) -->
+                    <path d="M120 160 Q150 180, 180 160" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <!-- Кубик в руке (как намёк на NFT/Telegram) -->
+                    <rect x="210" y="150" width="30" height="30" rx="6" fill="#4c9aff" stroke="#002a6e" stroke-width="3"/>
+                    <path d="M220 160 L235 150 L240 165 L225 175 Z" fill="#ffdd44" opacity="0.9"/>
+                    <!-- Брови (лёгкий намёк на харизму) -->
+                    <path d="M100 100 L130 95" stroke="#1e1e1e" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M200 100 L170 95" stroke="#1e1e1e" stroke-width="4" stroke-linecap="round"/>
+                    <defs>
+                        <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+                            <feOffset dx="0" dy="8" result="shadow"/>
+                        </filter>
+                    </defs>
+                </svg>
+            </div>
+            <div class="click-hint">
+                👆 ТАПАЙ СЮДА 👆
+            </div>
+        </div>
+
+        <!-- Улучшения (бусты) -->
+        <div class="boosts-grid">
+            <div class="boost-item" id="boostFriend">
+                <span class="boost-emoji">👥</span>
+                <div class="boost-info">
+                    <span class="boost-name">Друг Дурова</span>
+                    <span class="boost-price" id="friendPrice">100</span>
+                </div>
+            </div>
+            <div class="boost-item" id="boostVip">
+                <span class="boost-emoji">💎</span>
+                <div class="boost-info">
+                    <span class="boost-name">VK Coin</span>
+                    <span class="boost-price" id="vipPrice">500</span>
+                </div>
+            </div>
+            <div class="boost-item" id="boostStar">
+                <span class="boost-emoji">🚀</span>
+                <div class="boost-info">
+                    <span class="boost-name">Telegram Stars</span>
+                    <span class="boost-price" id="starPrice">2000</span>
+                </div>
+            </div>
+            <div class="boost-item" id="boostTon">
+                <span class="boost-emoji">⚡</span>
+                <div class="boost-info">
+                    <span class="boost-name">TON Keeper</span>
+                    <span class="boost-price" id="tonPrice">10000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка сброса -->
+        <button class="reset-button" id="resetGame">🔄 Перезапустить кликер</button>
+        <div class="footer">₿ каждый клик укрепляет децентрализацию</div>
+    </div>
+
+    <script>
+        (function() {
+            // Начальные значения
+            let score = 0;
+            let clickPower = 1;         // сколько даёт 1 клик
+
+            // Стоимость улучшений (базовая)
+            const BASE_FRIEND_PRICE = 100;
+            const BASE_VIP_PRICE = 500;
+            const BASE_STAR_PRICE = 2000;
+            const BASE_TON_PRICE = 10000;
+
+            // Множители (сколько добавляют)
+            const FRIEND_BOOST = 1;      // +1 к силе клика
+            const VIP_BOOST = 5;          // +5 к силе клика
+            const STAR_BOOST = 20;         // +20
+            const TON_BOOST = 100;          // +100
+
+            // Текущие цены (будут изменяться после покупок)
+            let currentFriendPrice = BASE_FRIEND_PRICE;
+            let currentVipPrice = BASE_VIP_PRICE;
+            let currentStarPrice = BASE_STAR_PRICE;
+            let currentTonPrice = BASE_TON_PRICE;
+
+            // DOM элементы
+            const scoreEl = document.getElementById('scoreDisplay');
+            const durovCard = document.getElementById('clickableDurov');
+
+            // Элементы бустов
+            const boostFriend = document.getElementById('boostFriend');
+            const boostVip = document.getElementById('boostVip');
+            const boostStar = document.getElementById('boostStar');
+            const boostTon = document.getElementById('boostTon');
+
+            // Ценовые спаны
+            const friendPriceSpan = document.getElementById('friendPrice');
+            const vipPriceSpan = document.getElementById('vipPrice');
+            const starPriceSpan = document.getElementById('starPrice');
+            const tonPriceSpan = document.getElementById('tonPrice');
+
+            // Функция обновления интерфейса (счет и классы disabled)
+            function refreshUI() {
+                scoreEl.textContent = score;
+
+                // Обновить отображение цен
+                friendPriceSpan.textContent = currentFriendPrice;
+                vipPriceSpan.textContent = currentVipPrice;
+                starPriceSpan.textContent = currentStarPrice;
+                tonPriceSpan.textContent = currentTonPrice;
+
+                // Подсветка нехватки денег (disable-класс)
+                if (score < currentFriendPrice) {
+                    boostFriend.classList.add('disabled-boost');
+                } else {
+                    boostFriend.classList.remove('disabled-boost');
+                }
+
+                if (score < currentVipPrice) {
+                    boostVip.classList.add('disabled-boost');
+                } else {
+                    boostVip.classList.remove('disabled-boost');
+                }
+
+                if (score < currentStarPrice) {
+                    boostStar.classList.add('disabled-boost');
+                } else {
+                    boostStar.classList.remove('disabled-boost');
+                }
+
+                if (score < currentTonPrice) {
+                    boostTon.classList.add('disabled-boost');
+                } else {
+                    boostTon.classList.remove('disabled-boost');
+                }
+            }
+
+            // Обработчик клика по Дурову
+            function handleDurovClick(e) {
+                score += clickPower;
+                refreshUI();
+
+                // Микро-анимация (дополнительно к :active)
+                durovCard.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    durovCard.style.transform = '';
+                }, 100);
+
+                // Маленький звук в консоли (шутка)
+                if (clickPower > 100) console.log('💰 МОНЕТЫ СЫПЛЮТСЯ!!!');
+            }
+
+            // Общие функции для покупок
+            function buyBoost(cost, boostAmount, priceElement, updatePriceCallback) {
+                if (score >= cost) {
+                    score -= cost;
+                    clickPower += boostAmount;
+
+                    // Обновляем цену (усложняем или оставляем фиксированной? пусть растет *2 для интереса)
+                    // Сделаем классическую прогрессию: цена увеличивается (умножаем на 1.6 и округляем)
+                    let newPrice = Math.floor(cost * 1.6);
+                    updatePriceCallback(newPrice);
+
+                    refreshUI();
+                    return true;
+                } else {
+                    // Дрожание элемента при нехватке денег
+                    const el = (priceElement === friendPriceSpan) ? boostFriend :
+                                (priceElement === vipPriceSpan) ? boostVip :
+                                (priceElement === starPriceSpan) ? boostStar : boostTon;
+                    el.style.transform = 'translateX(4px)';
+                    setTimeout(() => el.style.transform = '', 100);
+                    return false;
+                }
+            }
+
+            // Инициализация слушателей
+            durovCard.addEventListener('click', handleDurovClick);
+
+            // Буст "Друг Дурова"
+            boostFriend.addEventListener('click', () => {
+                buyBoost(currentFriendPrice, FRIEND_BOOST, friendPriceSpan, (newPrice) => {
+                    currentFriendPrice = newPrice;
+                });
+            });
+
+            // Буст "VK Coin"
+            boostVip.addEventListener('click', () => {
+                buyBoost(currentVipPrice, VIP_BOOST, vipPriceSpan, (newPrice) => {
+                    currentVipPrice = newPrice;
+                });
+            });
+
+            // Буст "Telegram Stars"
+            boostStar.addEventListener('click', () => {
+                buyBoost(currentStarPrice, STAR_BOOST, starPriceSpan, (newPrice) => {
+                    currentStarPrice = newPrice;
+                });
+            });
+
+            // Буст "TON Keeper"
+            boostTon.addEventListener('click', () => {
+                buyBoost(currentTonPrice, TON_BOOST, tonPriceSpan, (newPrice) => {
+                    currentTonPrice = newPrice;
+                });
+            });
+
+            // Сброс игры
+            document.getElementById('resetGame').addEventListener('click', () => {
+                score = 0;
+                clickPower = 1;
+                currentFriendPrice = BASE_FRIEND_PRICE;
+                currentVipPrice = BASE_VIP_PRICE;
+                currentStarPrice = BASE_STAR_PRICE;
+                currentTonPrice = BASE_TON_PRICE;
+                refreshUI();
+            });
+
+            // Начальный refresh
+            refreshUI();
+
+            // Защита от выделения при быстрых кликах (уже в CSS user-select)
+        })();
+    </script>
+</body>
+</html>
