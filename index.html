@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dev Monkey DUROV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            margin: 0;
+        }
+
+        .game-container {
+            background: rgba(18, 25, 45, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 20px 16px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.8), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(66, 135, 245, 0.4);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff, #80b3ff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px #3b82f6;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* Навигация */
+        .nav-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: #1e2b45;
+            border: 2px solid #3d5c96;
+            border-radius: 40px;
+            padding: 12px 0;
+            text-align: center;
+            color: #b0c8ff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 5px 0 #0a1422;
+        }
+
+        .nav-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0a1422;
+        }
+
+        .nav-btn.active {
+            background: #4c7bcb;
+            color: white;
+            border-color: #a0c0ff;
+        }
+
+        /* Секции */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .score-panel {
+            background: #0f1a2c;
+            border-radius: 40px;
+            padding: 12px 15px;
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #3a5795;
+            box-shadow: inset 0 3px 0 #030814, 0 7px 0 #070e1a;
+        }
+
+        .score-label {
+            color: #aac3ff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            background: #1f2f4f;
+            padding: 5px 12px;
+            border-radius: 30px;
+        }
+
+        .score-value {
+            font-weight: 900;
+            color: #ffdb9f;
+            text-shadow: 0 0 15px #ffa500;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(1.2rem, 5vw, 2.2rem);
+            max-width: 150px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .click-power-panel {
+            background: #0f1a2c;
+            border-radius: 40px;
+            padding: 12px 12px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border: 2px solid #3a5795;
+            box-shadow: inset 0 3px 0 #030814, 0 7px 0 #070e1a;
+        }
+
+        .power-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #7df3c0;
+            text-shadow: 0 0 15px #10b981;
+        }
+
+        .power-label {
+            font-size: 1rem;
+            color: #aac3ff;
+        }
+
+        .durov-card {
+            background: #111c34;
+            border-radius: 50px;
+            padding: 15px 15px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.08s linear;
+            border: 3px solid #3a5a9a;
+            box-shadow: 0 12px 0 #0a1424, 0 15px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .durov-card:active {
+            transform: translateY(8px);
+            box-shadow: 0 4px 0 #0a1424, 0 10px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .durov-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 40px;
+            overflow: hidden;
+            background: #1f2f4f;
+            padding: 10px;
+        }
+
+        .durov-photo {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 35px;
+            border: 4px solid #4f7eda;
+            object-fit: cover;
+            display: block;
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffdb9f;
+            text-shadow: 0 0 20px #ffa500;
+            animation: floatUp 1.2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.8); }
+        }
+
+        .progress-section {
+            background: #16263f;
+            border-radius: 40px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #3d5c96;
+        }
+
+        .progress-bar {
+            background: #0f1a2c;
+            height: 26px;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 2px solid #3a5a9a;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4c7bcb, #9bb9ff);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .boosts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .boosts-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-track {
+            background: #1a2742;
+            border-radius: 10px;
+        }
+        
+        .boosts-grid::-webkit-scrollbar-thumb {
+            background: #4f6eae;
+            border-radius: 10px;
+        }
+
+        .boost-item {
+            background: #16233f;
+            border-radius: 30px;
+            padding: 15px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #3d5c96;
+            box-shadow: 0 6px 0 #0d172a;
+            transition: 0.08s linear;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .boost-item:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0d172a;
+        }
+
+        .boost-emoji {
+            font-size: 2rem;
+            filter: drop-shadow(2px 4px 4px black);
+            margin-bottom: 5px;
+        }
+
+        .boost-name {
+            font-weight: 800;
+            color: white;
+            font-size: 0.85rem;
+            text-align: center;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+        }
+
+        .boost-price {
+            color: #ffbe76;
+            font-weight: 900;
+            font-size: 1rem;
+            background: #00000060;
+            padding: 5px 12px;
+            border-radius: 40px;
+            margin-top: 6px;
+            border: 1px solid #f39c12;
+        }
+
+        .boost-price::before {
+            content: "💰 ";
+            font-size: 0.8rem;
+        }
+
+        .boost-owned {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #4c7bcb;
+            color: white;
+            border-radius: 30px;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 0 #2d4379;
+        }
+
+        .disabled-boost {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Стили для профиля */
+        .profile-section {
+            background: #16263f;
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #4c7bcb;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background: #4c7bcb;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 3px solid #ffdb9f;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .profile-status {
+            color: #7df3c0;
+            font-size: 0.9rem;
+        }
+
+        .tg-login-btn {
+            background: #2AABEE;
+            border: none;
+            border-radius: 40px;
+            padding: 15px;
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1b7da0;
+            transition: 0.08s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tg-login-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #1b7da0;
+        }
+
+        .tg-login-btn.connected {
+            background: #2e7d32;
+            box-shadow: 0 5px 0 #1b5e20;
+        }
+
+        /* Стили для входа */
+        .auth-section {
+            background: #16263f;
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #4c7bcb;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            background: #1e2b45;
+            border: 2px solid #3d5c96;
+            border-radius: 40px;
+            padding: 12px;
+            text-align: center;
+            color: #b0c8ff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .auth-tab.active {
+            background: #4c7bcb;
+            color: white;
+        }
+
+        .auth-input {
+            width: 100%;
+            background: #0f1a2c;
+            border: 2px solid #3d5c96;
+            border-radius: 40px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: #4c7bcb;
+            border: none;
+            border-radius: 40px;
+            padding: 15px;
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2d4379;
+            transition: 0.08s linear;
+        }
+
+        .auth-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #2d4379;
+        }
+
+        /* Топ */
+        .leaderboard-section {
+            background: #16263f;
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #4c7bcb;
+        }
+
+        .leaderboard-title {
+            color: #ffdb9f;
+            font-weight: 900;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leaderboard-list {
+            background: #0f1a2c;
+            border-radius: 30px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #3d5c96;
+            color: white;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            font-weight: 900;
+            color: #ffdb9f;
+            width: 40px;
+        }
+
+        .leaderboard-name {
+            flex: 2;
+            font-weight: 600;
+        }
+
+        .leaderboard-score {
+            font-weight: 900;
+            color: #7df3c0;
+        }
+
+        .current-user {
+            background: #4c7bcb30;
+            border-radius: 20px;
+        }
+
+        .tg-username {
+            color: #2AABEE;
+            font-size: 0.8rem;
+        }
+
+        .telegram-link {
+            text-align: center;
+            margin: 15px 0 5px;
+        }
+
+        .telegram-btn {
+            display: inline-block;
+            background: #1e3a5f;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            border: 2px solid #4c7bcb;
+            box-shadow: 0 5px 0 #0a1424;
+            transition: 0.08s linear;
+        }
+
+        .telegram-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0a1424;
+        }
+
+        .disclaimer {
+            text-align: center;
+            color: #6b7f9f;
+            font-size: 0.7rem;
+            margin-top: 10px;
+            padding: 10px;
+            border-top: 1px solid #3d5c96;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6b7f9f;
+            font-size: 0.7rem;
+            margin-top: 10px;
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #1e3a5f;
+            color: #b0c8ff;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            border: 2px solid #4c7bcb;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 200;
+        }
+
+        .auto-save-indicator.show {
+            opacity: 1;
+        }
+
+        .floating-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a5f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            border: 2px solid #4c7bcb;
+            box-shadow: 0 5px 0 #0a1424;
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            0% { transform: translate(-50%, -150%); opacity: 0; }
+            100% { transform: translate(-50%, 0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title" id="gameTitle">Dev Monkey DUROV</h1>
+            <div class="subtitle">👆 тапай и становись легендой</div>
+        </div>
+
+        <!-- Навигация -->
+        <div class="nav-bar">
+            <div class="nav-btn active" id="navGame">🎮 ИГРА</div>
+            <div class="nav-btn" id="navBoosts">🚀 УЛУЧШЕНИЯ</div>
+            <div class="nav-btn" id="navTop">🏆 ТОП</div>
+            <div class="nav-btn" id="navProfile">👤 ПРОФИЛЬ</div>
+        </div>
+
+        <!-- Секция ИГРА -->
+        <div class="section active" id="gameSection">
+            <div class="stats-row">
+                <div class="score-panel">
+                    <span class="score-label">💎 TON</span>
+                    <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="click-power-panel">
+                    <span class="power-value" id="powerDisplay">1</span>
+                    <span class="power-label">⚡</span>
+                </div>
+            </div>
+
+            <!-- Кликабельный Дуров -->
+            <div class="durov-card" id="clickableDurov">
+                <div class="durov-image">
+                    <img class="durov-photo" 
+                         src="https://nmosknews.ru/img/20260216/aa1a30195815eee59c8dfc1932eb0159_o.jpg"
+                         alt="Павел Дуров"
+                         id="durovImage"
+                         onerror="this.src='https://i.imgur.com/3XJq7oU.jpg'">
+                </div>
+                <div class="click-hint" style="text-align: center; color: #d4e2ff; font-weight: 700; margin-top: 10px; background: #1e3260; padding: 8px 20px; border-radius: 40px; width: fit-content; margin-left: auto; margin-right: auto; border: 2px solid #4c7bcb;">
+                    👆 ТАПАЙ ПО ДУРОВУ 👆
+                </div>
+            </div>
+
+            <!-- Прогресс-бар -->
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    <span class="progress-text" id="progressText">0 / 10K</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция УЛУЧШЕНИЯ -->
+        <div class="section" id="boostsSection">
+            <div class="boosts-grid">
+                <div class="boost-item" id="boostBrother">
+                    <span class="boost-emoji">👥</span>
+                    <div class="boost-info">
+                        <span class="boost-name">БРАТ ДУРОВА</span>
+                        <span class="boost-price" id="brotherPrice">100</span>
+                    </div>
+                    <span class="boost-owned" id="brotherOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostVk">
+                    <span class="boost-emoji">📘</span>
+                    <div class="boost-info">
+                        <span class="boost-name">VK</span>
+                        <span class="boost-price" id="vkPrice">250</span>
+                    </div>
+                    <span class="boost-owned" id="vkOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostTg">
+                    <span class="boost-emoji">✈️</span>
+                    <div class="boost-info">
+                        <span class="boost-name">TELEGRAM</span>
+                        <span class="boost-price" id="tgPrice">500</span>
+                    </div>
+                    <span class="boost-owned" id="tgOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostMisha">
+                    <span class="boost-emoji">🔨</span>
+                    <div class="boost-info">
+                        <span class="boost-name">МИША БДСМ</span>
+                        <span class="boost-price" id="mishaPrice">1488</span>
+                    </div>
+                    <span class="boost-owned" id="mishaOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostTon">
+                    <span class="boost-emoji">💎</span>
+                    <div class="boost-info">
+                        <span class="boost-name">TON</span>
+                        <span class="boost-price" id="tonPrice">5000</span>
+                    </div>
+                    <span class="boost-owned" id="tonOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostSperma">
+                    <span class="boost-emoji">💦</span>
+                    <div class="boost-info">
+                        <span class="boost-name">СПЕРМА ДУРОВА</span>
+                        <span class="boost-price" id="spermaPrice">10000</span>
+                    </div>
+                    <span class="boost-owned" id="spermaOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostPepe">
+                    <span class="boost-emoji">🐸</span>
+                    <div class="boost-info">
+                        <span class="boost-name">PEPE</span>
+                        <span class="boost-price" id="pepePrice">100000</span>
+                    </div>
+                    <span class="boost-owned" id="pepeOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostNFT">
+                    <span class="boost-emoji">🖼️</span>
+                    <div class="boost-info">
+                        <span class="boost-name">NFT КОЛЛЕКЦИЯ</span>
+                        <span class="boost-price" id="nftPrice">25000</span>
+                    </div>
+                    <span class="boost-owned" id="nftOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostWallet">
+                    <span class="boost-emoji">👛</span>
+                    <div class="boost-info">
+                        <span class="boost-name">КРИПТОКОШЕЛЕК</span>
+                        <span class="boost-price" id="walletPrice">50000</span>
+                    </div>
+                    <span class="boost-owned" id="walletOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostMiner">
+                    <span class="boost-emoji">⛏️</span>
+                    <div class="boost-info">
+                        <span class="boost-name">TON МАЙНЕР</span>
+                        <span class="boost-price" id="minerPrice">100000</span>
+                    </div>
+                    <span class="boost-owned" id="minerOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostGalaxy">
+                    <span class="boost-emoji">🌌</span>
+                    <div class="boost-info">
+                        <span class="boost-name">ГАЛАКТИКА TON</span>
+                        <span class="boost-price" id="galaxyPrice">500000</span>
+                    </div>
+                    <span class="boost-owned" id="galaxyOwned">0</span>
+                </div>
+                <!-- НОВЫЕ УЛУЧШЕНИЯ -->
+                <div class="boost-item" id="boostHamster">
+                    <span class="boost-emoji">🐹</span>
+                    <div class="boost-info">
+                        <span class="boost-name">HAMSTER KOMBAT</span>
+                        <span class="boost-price" id="hamsterPrice">75000</span>
+                    </div>
+                    <span class="boost-owned" id="hamsterOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostNotcoin">
+                    <span class="boost-emoji">🪙</span>
+                    <div class="boost-info">
+                        <span class="boost-name">NOTCOIN</span>
+                        <span class="boost-price" id="notcoinPrice">150000</span>
+                    </div>
+                    <span class="boost-owned" id="notcoinOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostDurovCode">
+                    <span class="boost-emoji">🔮</span>
+                    <div class="boost-info">
+                        <span class="boost-name">DUROV CODE</span>
+                        <span class="boost-price" id="durovCodePrice">250000</span>
+                    </div>
+                    <span class="boost-owned" id="durovCodeOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostBlockchain">
+                    <span class="boost-emoji">🔗</span>
+                    <div class="boost-info">
+                        <span class="boost-name">БЛОКЧЕЙН</span>
+                        <span class="boost-price" id="blockchainPrice">500000</span>
+                    </div>
+                    <span class="boost-owned" id="blockchainOwned">0</span>
+                </div>
+                <div class="boost-item" id="boostLegend">
+                    <span class="boost-emoji">👑</span>
+                    <div class="boost-info">
+                        <span class="boost-name">ЛЕГЕНДА</span>
+                        <span class="boost-price" id="legendPrice">1000000</span>
+                    </div>
+                    <span class="boost-owned" id="legendOwned">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция ТОП -->
+        <div class="section" id="topSection">
+            <div class="leaderboard-section">
+                <div class="leaderboard-title">
+                    🏆 ГЛОБАЛЬНЫЙ ТОП
+                </div>
+
+                <div class="leaderboard-list" id="leaderboardList">
+                    <!-- Список будет добавляться динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция ПРОФИЛЬ -->
+        <div class="section" id="profileSection">
+            <!-- Если не авторизован -->
+            <div id="unauthProfile" style="display: block;">
+                <div class="auth-section">
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" id="loginTab">ВХОД</div>
+                        <div class="auth-tab" id="registerTab">РЕГИСТРАЦИЯ</div>
+                    </div>
+                    
+                    <div id="loginForm">
+                        <input type="text" class="auth-input" id="loginUsername" placeholder="ЛОГИН">
+                        <input type="password" class="auth-input" id="loginPassword" placeholder="ПАРОЛЬ">
+                        <button class="auth-btn" id="loginBtn">ВОЙТИ</button>
+                    </div>
+                    
+                    <div id="registerForm" style="display: none;">
+                        <input type="text" class="auth-input" id="regUsername" placeholder="ЛОГИН">
+                        <input type="password" class="auth-input" id="regPassword" placeholder="ПАРОЛЬ">
+                        <input type="password" class="auth-input" id="regConfirm" placeholder="ПОВТОРИТЕ ПАРОЛЬ">
+                        <button class="auth-btn" id="registerBtn">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Если авторизован -->
+            <div id="authProfile" style="display: none;">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">👤</div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="profileName">Имя</div>
+                            <div class="profile-status" id="profileStatus">Аккаунт</div>
+                        </div>
+                    </div>
+                    
+                    <button class="tg-login-btn" id="tgLoginBtn">
+                        <img src="https://telegram.org/img/t_logo.svg" style="width: 20px; height: 20px; filter: invert(1);">
+                        ПОДКЛЮЧИТЬ TELEGRAM
+                    </button>
+                    
+                    <button class="auth-btn" id="logoutBtn" style="margin-top: 15px; background: #ef4444; box-shadow: 0 5px 0 #b91c1c;">ВЫЙТИ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telegram ссылка -->
+        <div class="telegram-link">
+            <a href="https://t.me/DurevClicker" class="telegram-btn" target="_blank">📱 НАШ ТГ КАНАЛ</a>
+        </div>
+
+        <!-- Дисклеймер -->
+        <div class="disclaimer">
+            Сайт не имеет никакого отношения к настоящему Павлу Дурову.<br>
+            Сайт создан в развлекательных целях<br>
+            Dev Monkey 2026
+        </div>
+    </div>
+
+    <!-- Индикатор -->
+    <div class="auto-save-indicator" id="autoSaveIndicator">💾 СОХРАНЕНО</div>
+
+    <script>
+        (function() {
+            // ========== СОСТОЯНИЕ ИГРЫ ==========
+            let score = 0;
+            let clickPower = 1;
+            let totalEarned = 0;
+            let totalClicks = 0;
+            let cyclesCompleted = 0;
+            
+            // Улучшения - ВСЕ 16 штук
+            let owned = {
+                brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0,
+                nft: 0, wallet: 0, miner: 0, galaxy: 0,
+                hamster: 0, notcoin: 0, durovCode: 0, blockchain: 0, legend: 0
+            };
+
+            const PRICES = {
+                brother: 100,
+                vk: 250,
+                tg: 500,
+                misha: 1488,
+                ton: 5000,
+                sperma: 10000,
+                pepe: 100000,
+                nft: 25000,
+                wallet: 50000,
+                miner: 100000,
+                galaxy: 500000,
+                hamster: 75000,
+                notcoin: 150000,
+                durovCode: 250000,
+                blockchain: 500000,
+                legend: 1000000
+            };
+
+            const BOOSTS = {
+                brother: 1,
+                vk: 2,
+                tg: 4,
+                misha: 10,
+                ton: 30,
+                sperma: 100,
+                pepe: 500,
+                nft: 1000,
+                wallet: 2500,
+                miner: 5000,
+                galaxy: 10000,
+                hamster: 7500,
+                notcoin: 15000,
+                durovCode: 25000,
+                blockchain: 50000,
+                legend: 100000
+            };
+
+            let currentPrices = {
+                brother: PRICES.brother,
+                vk: PRICES.vk,
+                tg: PRICES.tg,
+                misha: PRICES.misha,
+                ton: PRICES.ton,
+                sperma: PRICES.sperma,
+                pepe: PRICES.pepe,
+                nft: PRICES.nft,
+                wallet: PRICES.wallet,
+                miner: PRICES.miner,
+                galaxy: PRICES.galaxy,
+                hamster: PRICES.hamster,
+                notcoin: PRICES.notcoin,
+                durovCode: PRICES.durovCode,
+                blockchain: PRICES.blockchain,
+                legend: PRICES.legend
+            };
+
+            // Прогресс
+            let currentProgress = 0;
+            const PROGRESS_MAX = 10000;
+
+            // ========== АККАУНТЫ ==========
+            let users = JSON.parse(localStorage.getItem('devMonkeyUsers')) || {};
+            let currentUser = null;
+            let tgConnected = false;
+            let tgUsername = '';
+
+            // Загрузка пользователей
+            function loadUsers() {
+                const saved = localStorage.getItem('devMonkeyUsers');
+                if (saved) {
+                    try {
+                        users = JSON.parse(saved);
+                    } catch (e) {
+                        users = {};
+                    }
+                }
+            }
+
+            function saveUsers() {
+                localStorage.setItem('devMonkeyUsers', JSON.stringify(users));
+            }
+
+            // Сохранение текущего пользователя
+            function saveCurrentUser() {
+                if (currentUser) {
+                    localStorage.setItem('devMonkeyCurrentUser', JSON.stringify({
+                        username: currentUser,
+                        tgConnected: tgConnected,
+                        tgUsername: tgUsername
+                    }));
+                }
+            }
+
+            // Загрузка текущего пользователя
+            function loadCurrentUser() {
+                const saved = localStorage.getItem('devMonkeyCurrentUser');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        currentUser = data.username;
+                        tgConnected = data.tgConnected || false;
+                        tgUsername = data.tgUsername || '';
+                        
+                        // Загружаем данные пользователя
+                        if (users[currentUser]) {
+                            score = users[currentUser].score || 0;
+                            clickPower = users[currentUser].clickPower || 1;
+                            totalEarned = users[currentUser].totalEarned || 0;
+                            totalClicks = users[currentUser].totalClicks || 0;
+                            cyclesCompleted = users[currentUser].cyclesCompleted || 0;
+                            currentProgress = users[currentUser].currentProgress || 0;
+                            owned = users[currentUser].owned || {
+                                brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0,
+                                nft: 0, wallet: 0, miner: 0, galaxy: 0,
+                                hamster: 0, notcoin: 0, durovCode: 0, blockchain: 0, legend: 0
+                            };
+                            currentPrices = users[currentUser].currentPrices || {
+                                brother: PRICES.brother, vk: PRICES.vk, tg: PRICES.tg,
+                                misha: PRICES.misha, ton: PRICES.ton, sperma: PRICES.sperma,
+                                pepe: PRICES.pepe, nft: PRICES.nft, wallet: PRICES.wallet,
+                                miner: PRICES.miner, galaxy: PRICES.galaxy,
+                                hamster: PRICES.hamster, notcoin: PRICES.notcoin,
+                                durovCode: PRICES.durovCode, blockchain: PRICES.blockchain,
+                                legend: PRICES.legend
+                            };
+                        }
+                        
+                        updateUIForAuth();
+                    } catch (e) {
+                        console.error('Ошибка загрузки пользователя:', e);
+                    }
+                }
+            }
+
+            // Сохранение данных пользователя
+            function saveUserData() {
+                if (currentUser) {
+                    if (!users[currentUser]) {
+                        users[currentUser] = {};
+                    }
+                    
+                    users[currentUser] = {
+                        score,
+                        clickPower,
+                        totalEarned,
+                        totalClicks,
+                        cyclesCompleted,
+                        currentProgress,
+                        owned,
+                        currentPrices
+                    };
+                    
+                    saveUsers();
+                    saveCurrentUser();
+                    updateLeaderboardScore();
+                }
+            }
+
+            // Обновление UI после авторизации
+            function updateUIForAuth() {
+                if (currentUser) {
+                    document.getElementById('unauthProfile').style.display = 'none';
+                    document.getElementById('authProfile').style.display = 'block';
+                    document.getElementById('profileName').textContent = currentUser;
+                    
+                    if (tgConnected) {
+                        document.getElementById('profileStatus').textContent = `✅ TG: @${tgUsername}`;
+                        document.getElementById('tgLoginBtn').classList.add('connected');
+                        document.getElementById('tgLoginBtn').innerHTML = `
+                            <img src="https://telegram.org/img/t_logo.svg" style="width: 20px; height: 20px; filter: invert(1);">
+                            ПОДКЛЮЧЕНО: @${tgUsername}
+                        `;
+                    } else {
+                        document.getElementById('profileStatus').textContent = 'Аккаунт';
+                        document.getElementById('tgLoginBtn').classList.remove('connected');
+                        document.getElementById('tgLoginBtn').innerHTML = `
+                            <img src="https://telegram.org/img/t_logo.svg" style="width: 20px; height: 20px; filter: invert(1);">
+                            ПОДКЛЮЧИТЬ TELEGRAM
+                        `;
+                    }
+                    
+                    refreshUI();
+                } else {
+                    document.getElementById('unauthProfile').style.display = 'block';
+                    document.getElementById('authProfile').style.display = 'none';
+                }
+            }
+
+            // ========== ТОП ==========
+            let leaderboard = [];
+
+            function updateLeaderboardScore() {
+                if (!currentUser) return;
+                
+                // Собираем всех пользователей в топ
+                leaderboard = [];
+                for (let username in users) {
+                    leaderboard.push({
+                        name: username,
+                        score: users[username].totalEarned || 0,
+                        tg: users[username].tgUsername || ''
+                    });
+                }
+                
+                updateLeaderboardUI();
+            }
+
+            function updateLeaderboardUI() {
+                const list = document.getElementById('leaderboardList');
+                if (!list) return;
+                
+                const sorted = [...leaderboard].sort((a, b) => b.score - a.score).slice(0, 20);
+                
+                list.innerHTML = '';
+                
+                if (sorted.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'leaderboard-item';
+                    emptyDiv.innerHTML = '<span style="color: #6b7f9f; text-align: center; width: 100%;">Пока нет игроков</span>';
+                    list.appendChild(emptyDiv);
+                    return;
+                }
+                
+                sorted.forEach((item, index) => {
+                    const isCurrentUser = item.name === currentUser;
+                    const div = document.createElement('div');
+                    div.className = `leaderboard-item ${isCurrentUser ? 'current-user' : ''}`;
+                    
+                    let nameDisplay = item.name;
+                    if (item.tg) {
+                        nameDisplay += ` <span class="tg-username">📱</span>`;
+                    }
+                    
+                    div.innerHTML = `
+                        <span class="leaderboard-rank">#${index + 1}</span>
+                        <span class="leaderboard-name">${nameDisplay}</span>
+                        <span class="leaderboard-score">${item.score.toLocaleString()} TON</span>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            // ========== ФУНКЦИИ ==========
+            function refreshUI() {
+                document.getElementById('scoreDisplay').textContent = score.toLocaleString();
+                document.getElementById('powerDisplay').textContent = clickPower;
+                
+                document.getElementById('progressFill').style.width = (currentProgress / PROGRESS_MAX * 100) + '%';
+                document.getElementById('progressText').textContent = `${currentProgress.toLocaleString()}/10K`;
+                
+                // Обновление цен для всех улучшений
+                for (let key in priceSpans) {
+                    if (priceSpans[key]) {
+                        priceSpans[key].textContent = currentPrices[key].toLocaleString();
+                    }
+                }
+                
+                // Обновление количества
+                for (let key in ownedSpans) {
+                    if (ownedSpans[key]) {
+                        ownedSpans[key].textContent = owned[key];
+                    }
+                }
+                
+                // Подсветка недоступных
+                for (let key in boostElements) {
+                    if (boostElements[key]) {
+                        if (score < currentPrices[key]) {
+                            boostElements[key].classList.add('disabled-boost');
+                        } else {
+                            boostElements[key].classList.remove('disabled-boost');
+                        }
+                    }
+                }
+                
+                if (currentUser) {
+                    saveUserData();
+                }
+            }
+
+            function createClickEffect(x, y, gain) {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.textContent = `+${gain} TON`;
+                effect.style.left = (x - 20) + 'px';
+                effect.style.top = (y - 30) + 'px';
+                document.getElementById('clickableDurov').appendChild(effect);
+                setTimeout(() => effect.remove(), 1000);
+            }
+
+            function handleDurovClick(e) {
+                const gain = clickPower;
+                score += gain;
+                totalEarned += gain;
+                totalClicks++;
+                currentProgress += gain;
+                
+                while (currentProgress >= PROGRESS_MAX) {
+                    currentProgress -= PROGRESS_MAX;
+                    cyclesCompleted++;
+                    const reward = 1000 + (cyclesCompleted * 100);
+                    score += reward;
+                    totalEarned += reward;
+                    showNotification(`🎉 ЦИКЛ ${cyclesCompleted} +${reward} TON`, 2000);
+                }
+                
+                const rect = document.getElementById('clickableDurov').getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                createClickEffect(x, y, gain);
+                
+                refreshUI();
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+
+            function buyBoost(key) {
+                const cost = currentPrices[key];
+                
+                if (score >= cost) {
+                    score -= cost;
+                    clickPower += BOOSTS[key];
+                    owned[key]++;
+                    
+                    currentPrices[key] = Math.floor(cost * 1.5);
+                    
+                    refreshUI();
+                    
+                    if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+                    showNotification(`✅ +${BOOSTS[key]} ⚡`, 1500);
+                } else {
+                    showNotification(`❌ НУЖНО ${cost.toLocaleString()} TON`, 1500);
+                    if (boostElements[key]) {
+                        boostElements[key].style.transform = 'translateX(5px)';
+                        setTimeout(() => {
+                            if (boostElements[key]) boostElements[key].style.transform = '';
+                        }, 150);
+                    }
+                }
+            }
+
+            // ========== АВТОРИЗАЦИЯ ==========
+            function register() {
+                const username = document.getElementById('regUsername').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const confirm = document.getElementById('regConfirm').value;
+                
+                if (!username || !password) {
+                    showNotification('❌ ЗАПОЛНИ ВСЕ ПОЛЯ', 1500);
+                    return;
+                }
+                
+                if (password !== confirm) {
+                    showNotification('❌ ПАРОЛИ НЕ СОВПАДАЮТ', 1500);
+                    return;
+                }
+                
+                if (users[username]) {
+                    showNotification('❌ ПОЛЬЗОВАТЕЛЬ УЖЕ СУЩЕСТВУЕТ', 1500);
+                    return;
+                }
+                
+                users[username] = {
+                    password: password,
+                    score: 0,
+                    clickPower: 1,
+                    totalEarned: 0,
+                    totalClicks: 0,
+                    cyclesCompleted: 0,
+                    currentProgress: 0,
+                    owned: {
+                        brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0,
+                        nft: 0, wallet: 0, miner: 0, galaxy: 0,
+                        hamster: 0, notcoin: 0, durovCode: 0, blockchain: 0, legend: 0
+                    },
+                    currentPrices: {
+                        brother: PRICES.brother, vk: PRICES.vk, tg: PRICES.tg,
+                        misha: PRICES.misha, ton: PRICES.ton, sperma: PRICES.sperma,
+                        pepe: PRICES.pepe, nft: PRICES.nft, wallet: PRICES.wallet,
+                        miner: PRICES.miner, galaxy: PRICES.galaxy,
+                        hamster: PRICES.hamster, notcoin: PRICES.notcoin,
+                        durovCode: PRICES.durovCode, blockchain: PRICES.blockchain,
+                        legend: PRICES.legend
+                    }
+                };
+                
+                saveUsers();
+                showNotification('✅ РЕГИСТРАЦИЯ УСПЕШНА', 1500);
+                
+                // Переключаем на вход
+                document.getElementById('loginTab').click();
+            }
+
+            function login() {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!users[username] || users[username].password !== password) {
+                    showNotification('❌ НЕВЕРНЫЙ ЛОГИН ИЛИ ПАРОЛЬ', 1500);
+                    return;
+                }
+                
+                currentUser = username;
+                
+                // Загружаем данные
+                score = users[username].score || 0;
+                clickPower = users[username].clickPower || 1;
+                totalEarned = users[username].totalEarned || 0;
+                totalClicks = users[username].totalClicks || 0;
+                cyclesCompleted = users[username].cyclesCompleted || 0;
+                currentProgress = users[username].currentProgress || 0;
+                owned = users[username].owned || {
+                    brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0,
+                    nft: 0, wallet: 0, miner: 0, galaxy: 0,
+                    hamster: 0, notcoin: 0, durovCode: 0, blockchain: 0, legend: 0
+                };
+                currentPrices = users[username].currentPrices || {
+                    brother: PRICES.brother, vk: PRICES.vk, tg: PRICES.tg,
+                    misha: PRICES.misha, ton: PRICES.ton, sperma: PRICES.sperma,
+                    pepe: PRICES.pepe, nft: PRICES.nft, wallet: PRICES.wallet,
+                    miner: PRICES.miner, galaxy: PRICES.galaxy,
+                    hamster: PRICES.hamster, notcoin: PRICES.notcoin,
+                    durovCode: PRICES.durovCode, blockchain: PRICES.blockchain,
+                    legend: PRICES.legend
+                };
+                
+                tgConnected = users[username].tgConnected || false;
+                tgUsername = users[username].tgUsername || '';
+                
+                updateUIForAuth();
+                refreshUI();
+                showNotification(`✅ ДОБРО ПОЖАЛОВАТЬ, ${username}!`, 1500);
+                
+                saveCurrentUser();
+            }
+
+            function logout() {
+                currentUser = null;
+                tgConnected = false;
+                tgUsername = '';
+                
+                // Сбрасываем данные
+                score = 0;
+                clickPower = 1;
+                totalEarned = 0;
+                totalClicks = 0;
+                cyclesCompleted = 0;
+                currentProgress = 0;
+                owned = {
+                    brother: 0, vk: 0, tg: 0, misha: 0, ton: 0, sperma: 0, pepe: 0,
+                    nft: 0, wallet: 0, miner: 0, galaxy: 0,
+                    hamster: 0, notcoin: 0, durovCode: 0, blockchain: 0, legend: 0
+                };
+                currentPrices = {
+                    brother: PRICES.brother, vk: PRICES.vk, tg: PRICES.tg,
+                    misha: PRICES.misha, ton: PRICES.ton, sperma: PRICES.sperma,
+                    pepe: PRICES.pepe, nft: PRICES.nft, wallet: PRICES.wallet,
+                    miner: PRICES.miner, galaxy: PRICES.galaxy,
+                    hamster: PRICES.hamster, notcoin: PRICES.notcoin,
+                    durovCode: PRICES.durovCode, blockchain: PRICES.blockchain,
+                    legend: PRICES.legend
+                };
+                
+                localStorage.removeItem('devMonkeyCurrentUser');
+                updateUIForAuth();
+                refreshUI();
+                showNotification('👋 ВЫ ВЫШЛИ', 1500);
+            }
+
+            // Telegram авторизация (имитация)
+            function connectTelegram() {
+                if (!currentUser) return;
+                
+                // Имитация окна авторизации Telegram
+                const tgUsername = prompt('ВВЕДИ ТВОЙ ЮЗЕРНЕЙМ В TELEGRAM (ДЛЯ ДЕМО):', '@username');
+                
+                if (tgUsername && tgUsername.startsWith('@')) {
+                    tgConnected = true;
+                    tgUsername = tgUsername.substring(1);
+                    
+                    users[currentUser].tgConnected = true;
+                    users[currentUser].tgUsername = tgUsername;
+                    
+                    saveUsers();
+                    saveCurrentUser();
+                    updateUIForAuth();
+                    updateLeaderboardScore();
+                    
+                    showNotification(`✅ TELEGRAM ПОДКЛЮЧЕН: @${tgUsername}`, 2000);
+                }
+            }
+
+            // ========== НАВИГАЦИЯ ==========
+            function showSection(sectionId) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+                
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                if (sectionId === 'gameSection') document.getElementById('navGame').classList.add('active');
+                if (sectionId === 'boostsSection') document.getElementById('navBoosts').classList.add('active');
+                if (sectionId === 'topSection') document.getElementById('navTop').classList.add('active');
+                if (sectionId === 'profileSection') document.getElementById('navProfile').classList.add('active');
+            }
+
+            // ========== ИНИЦИАЛИЗАЦИЯ ==========
+            const priceSpans = {
+                brother: document.getElementById('brotherPrice'),
+                vk: document.getElementById('vkPrice'),
+                tg: document.getElementById('tgPrice'),
+                misha: document.getElementById('mishaPrice'),
+                ton: document.getElementById('tonPrice'),
+                sperma: document.getElementById('spermaPrice'),
+                pepe: document.getElementById('pepePrice'),
+                nft: document.getElementById('nftPrice'),
+                wallet: document.getElementById('walletPrice'),
+                miner: document.getElementById('minerPrice'),
+                galaxy: document.getElementById('galaxyPrice'),
+                hamster: document.getElementById('hamsterPrice'),
+                notcoin: document.getElementById('notcoinPrice'),
+                durovCode: document.getElementById('durovCodePrice'),
+                blockchain: document.getElementById('blockchainPrice'),
+                legend: document.getElementById('legendPrice')
+            };
+
+            const ownedSpans = {
+                brother: document.getElementById('brotherOwned'),
+                vk: document.getElementById('vkOwned'),
+                tg: document.getElementById('tgOwned'),
+                misha: document.getElementById('mishaOwned'),
+                ton: document.getElementById('tonOwned'),
+                sperma: document.getElementById('spermaOwned'),
+                pepe: document.getElementById('pepeOwned'),
+                nft: document.getElementById('nftOwned'),
+                wallet: document.getElementById('walletOwned'),
+                miner: document.getElementById('minerOwned'),
+                galaxy: document.getElementById('galaxyOwned'),
+                hamster: document.getElementById('hamsterOwned'),
+                notcoin: document.getElementById('notcoinOwned'),
+                durovCode: document.getElementById('durovCodeOwned'),
+                blockchain: document.getElementById('blockchainOwned'),
+                legend: document.getElementById('legendOwned')
+            };
+
+            const boostElements = {
+                brother: document.getElementById('boostBrother'),
+                vk: document.getElementById('boostVk'),
+                tg: document.getElementById('boostTg'),
+                misha: document.getElementById('boostMisha'),
+                ton: document.getElementById('boostTon'),
+                sperma: document.getElementById('boostSperma'),
+                pepe: document.getElementById('boostPepe'),
+                nft: document.getElementById('boostNFT'),
+                wallet: document.getElementById('boostWallet'),
+                miner: document.getElementById('boostMiner'),
+                galaxy: document.getElementById('boostGalaxy'),
+                hamster: document.getElementById('boostHamster'),
+                notcoin: document.getElementById('boostNotcoin'),
+                durovCode: document.getElementById('boostDurovCode'),
+                blockchain: document.getElementById('boostBlockchain'),
+                legend: document.getElementById('boostLegend')
+            };
+
+            // Обработчики навигации
+            document.getElementById('navGame').addEventListener('click', () => showSection('gameSection'));
+            document.getElementById('navBoosts').addEventListener('click', () => showSection('boostsSection'));
+            document.getElementById('navTop').addEventListener('click', () => showSection('topSection'));
+            document.getElementById('navProfile').addEventListener('click', () => showSection('profileSection'));
+
+            // Клик по Дурову
+            document.getElementById('clickableDurov').addEventListener('click', handleDurovClick);
+
+            // Обработчики для всех улучшений (16 штук)
+            for (let key in boostElements) {
+                if (boostElements[key]) {
+                    boostElements[key].addEventListener('click', (function(k) {
+                        return function() { 
+                            buyBoost(k); 
+                        };
+                    })(key));
+                }
+            }
+
+            // Авторизация
+            document.getElementById('loginTab').addEventListener('click', function() {
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('registerTab').classList.remove('active');
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            });
+
+            document.getElementById('registerTab').addEventListener('click', function() {
+                document.getElementById('registerTab').classList.add('active');
+                document.getElementById('loginTab').classList.remove('active');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+            });
+
+            document.getElementById('registerBtn').addEventListener('click', register);
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('tgLoginBtn').addEventListener('click', connectTelegram);
+
+            function showNotification(message, duration) {
+                const notif = document.createElement('div');
+                notif.className = 'floating-notification';
+                notif.textContent = message;
+                document.body.appendChild(notif);
+                setTimeout(() => notif.remove(), duration);
+            }
+
+            // Загрузка данных
+            loadUsers();
+            loadCurrentUser();
+            updateLeaderboardScore();
+            refreshUI();
+            
+            // Автосохранение
+            setInterval(() => {
+                if (currentUser) {
+                    saveUserData();
+                    document.getElementById('autoSaveIndicator').classList.add('show');
+                    setTimeout(() => document.getElementById('autoSaveIndicator').classList.remove('show'), 2000);
+                }
+            }, 15000);
+            
+            window.addEventListener('beforeunload', function() {
+                if (currentUser) {
+                    saveUserData();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
